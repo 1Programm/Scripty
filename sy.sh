@@ -14,12 +14,21 @@ _VERSION=0.1
 
 # FUNCTIONS
 
+info(){
+  if [ "$_INFO" = "true" ]
+  then
+    echo "$@"
+  fi
+}
+
 printHelp(){
   echo
   echo "--- Scripty Help ---"
   echo "sy (-v | --version)  -> Print Version"
   echo "sy (-h | --help)     -> Print Help"
   echo "sy uninstall [--yes] -> Uninstall Scripty (--yes forces the uninstallation)"
+  echo "--------------------"
+  echo
 }
 
 equalsMultiple(){
@@ -57,6 +66,7 @@ runCommands(){
 
     if [ "$2" = "--yes" ]
     then
+      echo "Are you sure you want to uninstall scripty? [y/N]: y"
       _answer=true
     else
       read -p "Are you sure you want to uninstall scripty? [y/N]: " _r
@@ -69,8 +79,13 @@ runCommands(){
     if [ "$_answer" = "true" ]
     then
       echo "Uninstalling Scripty..."
+
+      info "Removing script command at [/usr/local/bin/sy] ..."
       sudo rm /usr/local/bin/sy
+
+      info "Removing workspace folder at [/usr/local/bin/sy.d] ..."
       sudo rm -r /usr/local/bin/sy.d
+
       echo "Done"
     else
       echo "Canceled!"
@@ -79,10 +94,18 @@ runCommands(){
     exit
   fi
 
+  if [ "$1" = "update" ]
+  then
+    echo "Updating scripty "
+
+
+    exit
+  fi
+
   equalsMultiple "$1" "-v" "--version"
   if [ "$_equalsMultiple" = "true" ]
   then
-    echo "Scripty version $_VERSION"
+    cat /usr/local/bin/sy.d/version
     exit
   fi
 
@@ -101,9 +124,16 @@ runCommands(){
   fi
 }
 
+argsContains "-i" "--informative"
+
+if [ "$_argsContains" = "true" ]
+then
+  _INFO=true
+fi
+
 # Try to run basic 'outer' commands so that java must not be started
 runCommands "$@"
 
 # No 'outer' command -> execute java scripty engine
 
-java -jar /usr/local/bin/sy.d/scripty.jar "@a"
+java -jar /usr/local/bin/sy.d/scripty.jar "$@"

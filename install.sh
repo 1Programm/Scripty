@@ -74,7 +74,7 @@ info(){
   fi
 }
 
-cmdlineHook(){
+sy_install(){
   if [ -f "/usr/local/bin/sy" ]
   then
     echo "/usr/local/bin/sy already exists!"
@@ -82,28 +82,61 @@ cmdlineHook(){
     exit
   fi
 
-  _SY_VERSIONS=( "$(curl -sS https://raw.githubusercontent.com/1Programm/Scripty/master/releases/versions)" )
-  _SY_DOWNLOAD_VERSION="$1"
 
-  echo "VERSIONS:" "${_SY_VERSIONS[@]}"
+  info "Downloading versions file: [https://raw.githubusercontent.com/1Programm/Scripty/master/releases/versions] ..."
+  _VERSIONS_CONTENT="$(curl -sS https://raw.githubusercontent.com/1Programm/Scripty/master/releases/versions)"
+  read -a _SY_VERSIONS <<< $_VERSIONS_CONTENT
+
+  for arg in "${_ARGS[@]}"
+  do
+      if [[ $arg != -*  ]]
+      then
+        _SY_DOWNLOAD_VERSION="$arg"
+        break
+      fi
+  done
 
   if [ "$_SY_DOWNLOAD_VERSION" = "" ]
   then
+    echo "Loading latest version ..."
     _SY_DOWNLOAD_VERSION="${_SY_VERSIONS[0]}"
+  else
+    info "A specific version was specified [$_SY_DOWNLOAD_VERSION]. Testing if it is a valid version ..."
+    _TEST=false
+    for v in "${_SY_VERSIONS[@]}"
+    do
+      if [ "$v" = "$_SY_DOWNLOAD_VERSION" ]
+      then
+        _TEST=true
+        break
+      fi
+    done
+
+    if [ "$_TEST" = "false" ]
+    then
+      echo "Invalid version: $_SY_DOWNLOAD_VERSION !"
+      exit
+    fi
   fi
 
-  echo "Downloading version $_SY_DOWNLOAD_VERSION"
+  echo "Downloading version [$_SY_DOWNLOAD_VERSION] ..."
+  echo "Creating sy command at [/usr/local/bin/sy]"
 
-  echo "Creating sy command at '/usr/local/bin/sy'"
+  info "Setting up workspace folder at [/usr/local/bin/sy.d] ..."
   mkdir /usr/local/bin/sy.d
 
-  cp /Users/julian/Desktop/Programming/Java/projects/scripty/sy.sh /usr/local/bin/sy
-  cp /Users/julian/Desktop/Programming/Java/projects/scripty/releases/scripty-"$_SY_DOWNLOAD_VERSION".jar /usr/local/bin/sy.d/scripty.jar
-
-  #curl -sS -o /usr/local/bin/sy https://raw.githubusercontent.com/1Programm/Scripty/master/sy.sh
+  info "Downloading 'sy' script command from [https://raw.githubusercontent.com/1Programm/Scripty/master/sy.sh] ..."
+  curl -sS -o /usr/local/bin/sy https://raw.githubusercontent.com/1Programm/Scripty/master/sy.sh
   chmod +x /usr/local/bin/sy
 
-  #curl -sS -o /usr/local/bin/sy.d/scripty.jar https://raw.githubusercontent.com/1Programm/Scripty/master/releases/scripty-latest.jar
+  _TMP_PATH="https://raw.githubusercontent.com/1Programm/Scripty/master/releases/scripty-$_SY_DOWNLOAD_VERSION.jar"
+  info "Downloading Scripty-Engine from [$_TMP_PATH] ..."
+  curl -sS -o /usr/local/bin/sy.d/scripty.jar "$_TMP_PATH"
+
+  info "Creating version file at [/usr/local/bin/sy.d/version] ..."
+  echo "$_SY_DOWNLOAD_VERSION" > /usr/local/bin/sy.d/version
+
+  echo "Installation successful!"
 }
 
 
@@ -119,11 +152,11 @@ then
 fi
 
 info "Scripty Installer [0.1]"
-info "Args: $@"
+info "Args: [$@]"
 
 
 
 
 
 # SETUP COMMANDLINE HOOK
-cmdlineHook "$@"
+sy_install "$@"
