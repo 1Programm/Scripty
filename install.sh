@@ -1,14 +1,26 @@
-#!/bin/sh
+#!/bin/bash
 
 # [UNIX] Scripty Installer 0.1
 
 # TEST IF 'sy' IS ALREADY INSTALLED (or name sy is taken)
-if command -v sy &> /dev/null
+
+_PATH_SY="$(command -v sy)"
+if [ "$_PATH_SY" != "" ]
 then
   echo "Scripty already installed or some other command uses 'sy'!"
   exit
 fi
 
+# TEST IF JAVA IS INSTALLED AND AT LEAST VERSION 11
+
+_PATH_JAVA="$(command -v java)"
+if [ "$_PATH_JAVA" = "" ]
+then
+  echo "Scripty is a command implemented in Java."
+  echo "You need to install Java (Version 11 or higher)"
+  exit
+  #TODO: Test Java version -> else
+fi
 
 
 # TEST IF USER IS ROOT
@@ -36,7 +48,7 @@ argsContains(){
   do
     for narg in "$@"
     do
-      if [ "$arg" == "$narg" ]
+      if [ "$arg" = "$narg" ]
       then
         _argsContains=true
         return
@@ -55,16 +67,9 @@ info(){
 cmdlineHook(){
   echo "Creating sy command at '/usr/local/bin/sy'"
   curl -o /usr/local/bin/sy https://raw.githubusercontent.com/1Programm/Scripty/master/sy.sh
+  curl -o /usr/local/bin/sy/scripty.jar https://raw.githubusercontent.com/1Programm/Scripty/master/releases/scripty-latest.jar
   chmod +x /usr/local/bin/sy
 }
-
-
-
-
-# STD PRINT
-clear
-echo "--- Scripty Installer 0.1 for UNIX ---"
-echo "--------------------------------------"
 
 
 
@@ -78,7 +83,8 @@ then
   _INFO=true
 fi
 
-info "Started installer with [" "$@" "]"
+info "Scripty Installer [0.1]"
+info "Args: $@"
 
 
 
