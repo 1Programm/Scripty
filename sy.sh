@@ -15,6 +15,8 @@ _VERSION=0.1
 # FUNCTIONS
 
 printHelp(){
+  echo
+  echo "--- Scripty Help ---"
   echo "sy (-v | --version)  -> Print Version"
   echo "sy (-h | --help)     -> Print Help"
   echo "sy uninstall [--yes] -> Uninstall Scripty (--yes forces the uninstallation)"
@@ -90,6 +92,13 @@ runCommands(){
     printHelp
     exit
   fi
+
+  equalsMultiple "$1" "--is-scripty"
+  if [ "$_equalsMultiple" = "true" ]
+  then
+    echo "Recognize Token: 53 63 72 69 70 74 79"
+    exit
+  fi
 }
 
 # Try to run basic 'outer' commands so that java must not be started
@@ -97,4 +106,4 @@ runCommands "$@"
 
 # No 'outer' command -> execute java scripty engine
 
-java -jar /usr/local/bin/sy/scripty.jar "@a"
+java -jar /usr/local/bin/sy.d/scripty.jar "@a"
