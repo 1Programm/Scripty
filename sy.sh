@@ -23,11 +23,11 @@ info(){
 
 printHelp(){
   echo
-  echo "--- Scripty Help ---"
-  echo "sy (-v | --version)  -> Print Version"
-  echo "sy (-h | --help)     -> Print Help"
-  echo "sy uninstall [--yes] -> Uninstall Scripty (--yes forces the uninstallation)"
-  echo "--------------------"
+  echo "# Scripty Help"
+  echo "| sy (-v | --version)  -> Print Version"
+  echo "| sy (-h | --help)     -> Print Help"
+  echo "| sy uninstall [--yes] -> Uninstall Scripty (--yes forces the uninstallation)"
+  echo "| sy update            -> Update to latest version"
   echo
 }
 
@@ -96,8 +96,33 @@ runCommands(){
 
   if [ "$1" = "update" ]
   then
-    echo "Updating scripty "
+    _CUR_VERSION="$(cat /usr/local/bin/sy.d/version)"
 
+    info "Downloading versions file: [https://raw.githubusercontent.com/1Programm/Scripty/master/releases/versions] ..."
+    _VERSIONS_CONTENT="$(curl -sS https://raw.githubusercontent.com/1Programm/Scripty/master/releases/versions)"
+    read -a _SY_VERSIONS <<< $_VERSIONS_CONTENT
+
+    _SY_LATEST="${_SY_VERSIONS[0]}"
+
+    if [ "$_CUR_VERSION" = "$_SY_LATEST" ]
+    then
+      echo "Scripty already up to date!"
+    else
+      echo "Updating Scripty [$_CUR_VERSION > $_SY_LATEST] ..."
+
+      info "Updating version file at [/usr/local/bin/sy.d/version]"
+      sudo rm /usr/local/bin/sy.d/version
+      sudo bash -c "echo $_SY_LATEST > /usr/local/bin/sy.d/version"
+
+
+      info "Updating Scripty-Engine at [/usr/local/bin/sy.d/scripty.jar]"
+      sudo rm /usr/local/bin/sy.d/scripty.jar
+      _TMP_PATH="https://raw.githubusercontent.com/1Programm/Scripty/master/releases/scripty-$_SY_LATEST.jar"
+      info "Downloading Scripty-Engine from [$_TMP_PATH] ..."
+      sudo curl -sS -o /usr/local/bin/sy.d/scripty.jar "$_TMP_PATH"
+
+      echo "Scripty successfully updated to version [$_SY_LATEST]!"
+    fi
 
     exit
   fi

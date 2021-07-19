@@ -98,7 +98,7 @@ sy_install(){
 
   if [ "$_SY_DOWNLOAD_VERSION" = "" ]
   then
-    echo "Loading latest version ..."
+    info "Loading latest version ..."
     _SY_DOWNLOAD_VERSION="${_SY_VERSIONS[0]}"
   else
     info "A specific version was specified [$_SY_DOWNLOAD_VERSION]. Testing if it is a valid version ..."

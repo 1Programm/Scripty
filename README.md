@@ -3,7 +3,8 @@
 ### Command usage:
 `sy (-v | --version)  -> Print Version`\
 `sy (-h | --help)     -> Print Help`\
-`sy uninstall [--yes] -> Uninstall Scripty (--yes forces the uninstallation)`
+`sy uninstall [--yes] -> Uninstall Scripty (--yes forces the uninstallation)`\
+`sy update            -> Update to latest version`
 
 
 
