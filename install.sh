@@ -98,7 +98,7 @@ sy_install(){
 
   if [ "$_SY_DOWNLOAD_VERSION" = "" ]
   then
-    info "Loading latest version ..."
+    info "No version specified! Loading latest version ..."
     _SY_DOWNLOAD_VERSION="${_SY_VERSIONS[0]}"
   else
     info "A specific version was specified [$_SY_DOWNLOAD_VERSION]. Testing if it is a valid version ..."
@@ -116,12 +116,17 @@ sy_install(){
     then
       echo "Invalid version: $_SY_DOWNLOAD_VERSION !"
       exit
+    else
+      info "Valid version $_SY_DOWNLOAD_VERSION!"
     fi
   fi
+
+  info ""
 
   echo "Downloading version [$_SY_DOWNLOAD_VERSION] ..."
   echo "Creating sy command at [/usr/local/bin/sy]"
 
+  info ""
   info "Setting up workspace folder at [/usr/local/bin/sy.d] ..."
   mkdir /usr/local/bin/sy.d
 
@@ -136,6 +141,7 @@ sy_install(){
   info "Creating version file at [/usr/local/bin/sy.d/version] ..."
   echo "$_SY_DOWNLOAD_VERSION" > /usr/local/bin/sy.d/version
 
+  info ""
   echo "Installation successful!"
 }
 
@@ -153,6 +159,7 @@ fi
 
 info "Scripty Installer [0.1]"
 info "Args: [$@]"
+info ""
 
 
 

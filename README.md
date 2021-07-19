@@ -4,7 +4,7 @@
 `sy (-v | --version)  -> Print Version`\
 `sy (-h | --help)     -> Print Help`\
 `sy uninstall [--yes] -> Uninstall Scripty (--yes forces the uninstallation)`\
-`sy update            -> Update to latest version`
+`sy update [-i]       -> Update to latest version (-i for debug info)`
 
 
 
@@ -15,7 +15,10 @@ To install the sy commando use the following command inside a terminal:
 ### For UNIX:
 `sudo curl -s https://raw.githubusercontent.com/1Programm/Scripty/master/install.sh | sudo bash`
 #### To get a specific version:
-`sudo curl -s https://raw.githubusercontent.com/1Programm/Scripty/master/install.sh | sudo bash -s [version]`
+`sudo curl -s https://raw.githubusercontent.com/1Programm/Scripty/master/install.sh | sudo bash -s -- [version]`
+#### To print debug info while installing:
+`sudo curl -s https://raw.githubusercontent.com/1Programm/Scripty/master/install.sh | sudo bash -s -- -i`\
+(Can be combined with specifying a version)
 
 #### On error:
 If running the command tells you that the Java Runtime is not installed follow this link:
