@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# [UNIX] Scripty Installer 0.1
+# [UNIX] Scripty Installer
 
 # TEST IF 'sy' IS ALREADY INSTALLED (or name sy is taken)
 
@@ -157,7 +157,7 @@ then
   _INFO=true
 fi
 
-info "Scripty Installer [0.1]"
+info "Scripty Installer"
 info "Args: [$@]"
 info ""
 

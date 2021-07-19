@@ -1,15 +1,13 @@
 #!/bin/bash
 
 
-# [UNIX] Scripty 0.1
+# [UNIX] Scripty Command
 
 
 
 
 # VARS
-
 _ARGS=( "$@" )
-_VERSION=0.1
 
 
 # FUNCTIONS
@@ -28,6 +26,7 @@ printHelp(){
   echo "| sy (-h | --help)     -> Print Help"
   echo "| sy uninstall [--yes] -> Uninstall Scripty (--yes forces the uninstallation)"
   echo "| sy update [-i]       -> Update to latest version (-i for debug info)"
+  echo "| sy status [-i]       -> Checks and prints the current status of scripty. (-i for debug info)"
   echo
 }
 
