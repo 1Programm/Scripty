@@ -13,12 +13,14 @@ You can implement your own Module by using the scripty-modules-api Library.
 <details>
 <summary><b>Unix</b></summary>
 
-The installation will create a bash script in /usr/local/bin which is a default of the environment PATH variable.\
-Because of that the name of that file there can then be used as a command to execute that file.
-
+Simply use:
 ```
 sudo curl -s https://raw.githubusercontent.com/1Programm/Scripty/master/install.sh | sudo bash
 ```
+
+The installation will create a bash script in /usr/local/bin which is a default of the environment PATH variable.\
+Because of that the name of that file there can then be used as a command to execute that file.
+
 
 #### Options:
 |Option|Description|
@@ -34,6 +36,8 @@ sudo curl -s https://raw.githubusercontent.com/1Programm/Scripty/master/install.
 If running the command tells you that the Java Runtime is not installed follow this link:
 [https://stackoverflow.com/questions/12309253/sudo-java-command-not-found-after-exiting-from-root-user](https://stackoverflow.com/questions/12309253/sudo-java-command-not-found-after-exiting-from-root-user)
 
+#### Scripty Home:
+Default: ~/.scripty/
 
 </details>
 
@@ -45,8 +49,17 @@ Not supported yet!
 ## The 'sy' Command:
 
 ### Usage:
-`sy (-v | --version)  -> Print Version`\
-`sy (-h | --help)     -> Print Help`\
-`sy uninstall [--yes] -> Uninstall Scripty (--yes forces the uninstallation)`\
-`sy update [-i]       -> Update to latest version (-i for debug info)`\
-`sy status [-i]       -> Checks and prints the current status of scripty. (-i for debug info)`
+|Optional|Description|
+|---|---|
+|-i / --info|Prints more debug info when running the command.|
+|-v / --version|Prints the version of scripty and exits.|
+|-h / --help|Prints Help and exits.|
+
+```
+sy [command]            -> Runs the command [command]
+sy uninstall (--yes)    -> Uninstall Scripty (--yes forces the uninstallation)
+sy update               -> Update to latest version.
+sy status               -> Checks and prints the current status of scripty.
+sy module-add [name]    -> Searches in [sy-repositories] for the module [name] and addes the module.
+sy module-remove [name] -> Removes the module [name].
+```

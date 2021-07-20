@@ -61,21 +61,36 @@ argsContains(){
 runCommands(){
   if [ "$1" = "uninstall" ]
   then
-    _answer=false
+
+    _answer1=false
 
     if [ "$2" = "--yes" ]
     then
       echo "Are you sure you want to uninstall scripty? [y/N]: y"
-      _answer=true
+      _answer1=true
     else
-      read -p "Are you sure you want to uninstall scripty? [y/N]: " _r
-      if [ "$_r" = "y" ]
+      read -p "Are you sure you want to uninstall scripty? [y/N]: " _r1
+      if [ "$_r1" = "y" ]
       then
-        _answer=true
+        _answer1=true
       fi
     fi
 
-    if [ "$_answer" = "true" ]
+    _answer2=false
+
+    if [ "$2" = "--yes" ]
+    then
+      echo "Do you want to remove local user data (~/.scripty/*)? [y/N]: y"
+      _answer2=true
+    else
+      read -p "Do you want to remove local user data (~/.scripty/*)? [y/N]: " _r2
+      if [ "$_r2" = "y" ]
+      then
+        _answer2=true
+      fi
+    fi
+
+    if [ "$_answer1" = "true" ]
     then
       echo "Uninstalling Scripty..."
 
@@ -84,6 +99,12 @@ runCommands(){
 
       info "Removing workspace folder at [/usr/local/bin/sy.d] ..."
       sudo rm -r /usr/local/bin/sy.d
+
+      if [ "$_answer2" = "true" ]
+      then
+        info "Removing local user data at [$HOME/.scripty] ..."
+        rm -r ~/.scripty
+      fi
 
       echo "Done"
     else
@@ -164,4 +185,5 @@ runCommands "$@"
 
 # No 'outer' command -> execute java scripty engine
 
-java -jar /usr/local/bin/sy.d/scripty.jar "$@"
+WORKSPACE_PATH="$HOME/.scripty"
+java -jar /usr/local/bin/sy.d/scripty.jar "$WORKSPACE_PATH" "$@"
