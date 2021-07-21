@@ -1,17 +1,20 @@
 package com.programm.projects.scripty.app;
 
 import com.programm.projects.scripty.core.Args;
+import com.programm.projects.scripty.core.IOutput;
 import com.programm.projects.scripty.modules.api.Module;
+import com.programm.projects.scripty.modules.api.ScriptyContext;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import static com.programm.projects.scripty.app.FileUtils.*;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.*;
 
 public class Scripty {
 
@@ -21,6 +24,7 @@ public class Scripty {
     private File repoFile;
     private File modulesFile;
     private final List<String> repos = new ArrayList<>();
+    private final Map<String, String> moduleMap = new HashMap<>();
     private final List<Module> modules = new ArrayList<>();
 
     public void init(String workspace){
@@ -29,52 +33,166 @@ public class Scripty {
             this.repoFile = new File(workspaceFolder, "sy.repos");
 
             if(!repoFile.exists()){
-                initRepo();
+                initReposFile();
             }
 
-            this.modulesFile = getCreateFile(workspaceFolder, "sy.modules");
+            this.modulesFile = new File(workspaceFolder, "sy.modules");
 
+            if(!modulesFile.exists()){
+                initModulesFile();
+            }
+
+            initRepos();
             loadModules();
             initModules();
         }
         catch (Exception e){
-            System.err.println("Error while initializing workspace: " + e.getMessage());
+            System.err.println("Error while initializing workspace: " + e);
             System.exit(-1);
         }
     }
 
-    private void initRepo() throws IOException {
+    private void initReposFile() throws IOException {
         if(!repoFile.createNewFile()){
             throw new IllegalStateException("Could not create file [" + repoFile.getAbsolutePath() + "]!");
         }
 
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(repoFile))){
-            writer.write("[\n   " + BASE_REPO + "\n]");
+            writer.write("[\n   \"" + BASE_REPO + "\"\n]");
         }
+    }
+
+    private void initModulesFile() throws IOException {
+        if(!modulesFile.createNewFile()){
+            throw new IllegalStateException("Could not create file [" + modulesFile.getAbsolutePath() + "]!");
+        }
+
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(modulesFile))){
+            writer.write("{\n\n}");
+        }
+    }
+
+    private void initRepos() throws IOException, ParseException {
+        ModulesLoader.loadRepos(repoFile, repos);
+
+        System.out.println("Finished loading repos: " + Arrays.toString(repos.toArray()));
+    }
+
+    private String lookupModule(String moduleName) throws IOException, ParseException {
+        System.out.println("Lookup: " + moduleName);
+        for(String repo : repos){
+            JSONObject oRepo = (JSONObject) ModulesLoader.readJsonFromUrl(repo);
+
+            String repoName = oRepo.get("name").toString();
+            JSONArray oModules = (JSONArray) oRepo.get("modules");
+
+            for(Object oModule : oModules){
+                JSONObject module = (JSONObject) oModule;
+
+                String name = module.get("name").toString();
+                if(moduleName.equals(name)){
+                    System.out.println("Found module [" + moduleName + "] in repo: [" + repoName + "].");
+
+                    return module.get("url").toString();
+                }
+            }
+        }
+
+        throw new IOException("Could not find module: [" + moduleName + "] in the repositories!");
     }
 
     private void loadModules(){
         try {
-            ModulesLoader.loadRepos(repoFile, repos);
-        } catch (IOException | ParseException e) {
-            System.err.println("Error loading the repositories file: " + e.getMessage());
+            System.out.println("Loading Modules...");
+            JSONObject root = (JSONObject) ModulesLoader.readJsonFromFile(modulesFile);
+            System.out.println("Loaded Modules: " + root);
+            for(Object oName : root.keySet()){
+                String name = oName.toString();
+                String value = root.get(oName).toString();
+
+                File installedModule = new File(value);
+
+                if(!installedModule.exists()){
+                    String moduleUrl = lookupModule(name);
+                    ModulesLoader.createModule(moduleUrl, installedModule);
+                }
+            }
+        }
+        catch (IOException | ParseException e){
+            System.err.println("Error reading sy.modules file: " + e);
             System.exit(-1);
         }
-
-        System.out.println("Finished loading repos file.");
-
-        try {
-            ModulesLoader.loadModules(repos, modules);
-        } catch (IOException | ParseException e) {
-            System.err.println("Error loading a repository: " + e.getMessage());
-            System.exit(-1);
-        }
-
-        System.out.println("Finished loading modules.");
     }
 
     private void initModules(){
+        try {
+            System.out.println("Initializing Modules...");
+            JSONObject root = (JSONObject) ModulesLoader.readJsonFromFile(modulesFile);
+            for(Object oName : root.keySet()){
+                String name = oName.toString();
+                String moduleFolder = root.get(oName).toString();
 
+                if(!moduleFolder.endsWith("/")) moduleFolder += "/";
+
+                String modulePath = moduleFolder + "sy.module";
+                JSONObject oModule = (JSONObject) ModulesLoader.readJsonFromPath(modulePath);
+
+                File installedModule = new File(moduleFolder);
+
+                if(!installedModule.exists()){
+                    throw new IOException("Module [" + name + "] is not installed properly!");
+                }
+
+                String modulePackage = oModule.get("module-package").toString();
+                String moduleEntry = oModule.get("module-entry").toString();
+
+                ClassLoader classLoader = new URLClassLoader(new URL[] { installedModule.toURI().toURL() });
+                String startClass = modulePackage + "." + moduleEntry;
+
+                try {
+                    Class<?> moduleEntryClass = classLoader.loadClass(startClass);
+                    Object o = moduleEntryClass.getConstructor().newInstance();
+
+                    if(o instanceof Module){
+                        Module m = (Module) o;
+                        ScriptyContext context = new ScriptyContext() {
+                            @Override
+                            public String getModuleName() {
+                                return "test-module";
+                            }
+
+                            @Override
+                            public IOutput out() {
+                                return new IOutput() {
+                                    @Override
+                                    public void print(String s) {
+                                        System.out.print(s);
+                                    }
+
+                                    @Override
+                                    public void println(String s) {
+                                        System.out.println(s);
+                                    }
+
+                                    @Override
+                                    public void newLine() {
+                                        System.out.println();
+                                    }
+                                };
+                            }
+                        };
+                        m.init(context);
+                    }
+
+                } catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        catch (IOException | ParseException e){
+            System.err.println("Error reading sy.modules file: " + e);
+            System.exit(-1);
+        }
     }
 
     public void run(String command, Args args){
