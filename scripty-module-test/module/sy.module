@@ -1,0 +1,11 @@
+{
+  "name": "test-module",
+  "version": "1.0-SNAPSHOT",
+  "authors": ["Programm"],
+
+  "module-package": "com.programm.projects.scripty.module.test",
+  "module-classes": ["Test"],
+  "module-entry": "Test",
+
+  "depends": {}
+}
