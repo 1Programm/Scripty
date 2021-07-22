@@ -96,10 +96,23 @@ public class Args implements Iterable<String>{
         return sb.toString();
     }
 
-    private void testBounds(int i, String varName){
-        if(i < 0) throw new IndexOutOfBoundsException(varName + ": [" + i + "] is below 0!");
-        if(i >= size()) throw new IndexOutOfBoundsException(varName + ": [" + i + "] is greater than size(" + size() + ")!");
+    public Args removed(int index){
+        if(index < 0) return this;
+        if(index >= args.length) return this;
+
+        String[] nArgs = new String[args.length];
+
+        int o = 0;
+        for(int i=0;i<args.length;i++){
+            if(i != index){
+                nArgs[o] = args[i];
+                o++;
+            }
+        }
+
+        return new Args(nArgs);
     }
+
 
 
 
@@ -111,7 +124,6 @@ public class Args implements Iterable<String>{
     }
 
     public String get(int i){
-        testBounds(i, "i");
         return args[i];
     }
 
@@ -132,7 +144,6 @@ public class Args implements Iterable<String>{
     }
 
     public boolean is(int i, String arg) {
-        testBounds(i, "i");
         return args[i].equals(arg);
     }
 

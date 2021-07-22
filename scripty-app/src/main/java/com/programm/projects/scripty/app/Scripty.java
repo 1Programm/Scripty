@@ -1,6 +1,8 @@
 package com.programm.projects.scripty.app;
 
 import com.programm.projects.scripty.core.Args;
+import com.programm.projects.scripty.modules.api.CommandExecutionException;
+import com.programm.projects.scripty.modules.api.SyCommand;
 
 import java.io.IOException;
 import java.util.Map;
@@ -17,8 +19,8 @@ public class Scripty {
 
     public Scripty() {
         this.workspace = new ScriptyWorkspace(out, log, err);
-        this.modulesManager = new ScriptyModulesManager(out, log, err);
-        this.context = new CoreScriptyContext(modulesManager, out);
+        this.modulesManager = new ScriptyModulesManager(log, err);
+        this.context = new CoreScriptyContext(out, log, err);
     }
 
     public void init(String workspacePath){
@@ -34,8 +36,15 @@ public class Scripty {
     }
 
     public void run(String command, Args args){
-        if(args.contains("-i") || args.contains("--info")){
+        int index_info = args.indexOf("-i");
+
+        if(index_info == -1){
+            index_info = args.indexOf("--info");
+        }
+
+        if(index_info != -1){
             log.enable();
+            args = args.removed(index_info);
         }
 
         try {
@@ -46,6 +55,19 @@ public class Scripty {
             //First init Modules and then check custom commands
             workspace.loadAndInitModules(modulesManager, context);
 
+            SyCommand cmd = context.getCommand(command);
+
+            if(cmd == null){
+                err.println("No such command: [" + command + "].");
+                return;
+            }
+
+            try {
+                cmd.run(context, command, args);
+            }
+            catch (CommandExecutionException e){
+                err.println("Error executing command [" + command + "]: " + e.getMessage());
+            }
         }
         catch (IOException e){
             err.println("Error while running command [" + command + "]: " + e.getMessage());

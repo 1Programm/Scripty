@@ -1,8 +1,8 @@
 package com.programm.projects.scripty.app;
 
 import com.programm.projects.scripty.core.IOutput;
+import com.programm.projects.scripty.core.ModuleFileConfig;
 import com.programm.projects.scripty.modules.api.Module;
-import com.programm.projects.scripty.modules.api.ScriptyContext;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -13,18 +13,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ScriptyModulesManager implements ModuleConfigProvider{
+public class ScriptyModulesManager {
 
-    private final IOutput out;
     private final IOutput log;
     private final IOutput err;
 
     private final List<Module> modules = new ArrayList<>();
     private final Map<Module, ModuleFileConfig> moduleConfigs = new HashMap<>();
-    private URLClassLoader classLoader;
 
-    public ScriptyModulesManager(IOutput out, IOutput log, IOutput err) {
-        this.out = out;
+    public ScriptyModulesManager(IOutput log, IOutput err) {
         this.log = log;
         this.err = err;
     }
@@ -32,7 +29,7 @@ public class ScriptyModulesManager implements ModuleConfigProvider{
     public void initModules(URL[] classPaths, List<String> entryPoints, Map<String, ModuleFileConfig> namedModuleConfigs, CoreScriptyContext ctx){
         log.println("Adding [" + classPaths.length + "] classPaths to ClassLoader ...");
 
-        classLoader = new URLClassLoader(classPaths);
+        URLClassLoader classLoader = new URLClassLoader(classPaths);
 
 
         for(String entry : entryPoints){
@@ -55,8 +52,8 @@ public class ScriptyModulesManager implements ModuleConfigProvider{
         log.println("Initializing Modules ...");
 
         for(Module module : modules){
-            ctx.setCurrentModuleContext(module);
-            module.init(ctx);
+            ModuleFileConfig moduleConfig = moduleConfigs.get(module);
+            module.init(ctx, moduleConfig);
         }
 
         log.println("Finished initialization of Modules.");
@@ -89,8 +86,4 @@ public class ScriptyModulesManager implements ModuleConfigProvider{
         return null;
     }
 
-    @Override
-    public ModuleFileConfig provide(Module from) {
-        return moduleConfigs.get(from);
-    }
 }

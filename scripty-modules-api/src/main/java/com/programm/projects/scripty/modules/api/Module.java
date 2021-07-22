@@ -1,18 +1,8 @@
 package com.programm.projects.scripty.modules.api;
 
+import com.programm.projects.scripty.core.ModuleFileConfig;
+
 public abstract class Module {
 
-    private ScriptyContext context;
-
-    protected abstract void onInit(ScriptyContext context);
-
-    public final void init(ScriptyContext context){
-        this.context = context;
-
-        onInit(context);
-    }
-
-    public final String getName() {
-        return context.getModuleName();
-    }
+    public abstract void init(ScriptyContext context, ModuleFileConfig moduleConfig);
 }

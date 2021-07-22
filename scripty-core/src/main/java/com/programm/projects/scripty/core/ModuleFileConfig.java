@@ -1,4 +1,4 @@
-package com.programm.projects.scripty.app;
+package com.programm.projects.scripty.core;
 
 import java.util.List;
 
