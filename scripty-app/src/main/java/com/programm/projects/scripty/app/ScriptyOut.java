@@ -7,7 +7,7 @@ import java.io.PrintStream;
 public class ScriptyOut implements IOutput {
 
     private final PrintStream out;
-    private final boolean enabled;
+    private boolean enabled;
 
     public ScriptyOut(PrintStream out, boolean enabled) {
         this.out = out;
@@ -30,5 +30,13 @@ public class ScriptyOut implements IOutput {
     public void newLine() {
         if(!enabled) return;
         out.println();
+    }
+
+    public void enable(){
+        this.enabled = true;
+    }
+
+    public void disable(){
+        this.enabled = false;
     }
 }

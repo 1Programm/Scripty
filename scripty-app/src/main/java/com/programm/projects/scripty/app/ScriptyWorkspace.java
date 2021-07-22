@@ -1,6 +1,7 @@
 package com.programm.projects.scripty.app;
 
 import com.programm.projects.scripty.core.IOutput;
+import com.programm.projects.scripty.modules.api.ScriptyContext;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -14,7 +15,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ScriptyWorkspace {
 
@@ -27,6 +30,7 @@ public class ScriptyWorkspace {
     private static final String FILE_SY_MODULE = "sy.module";
     private static final String CONTENT_DEFAULT_REPO = "https://raw.githubusercontent.com/1Programm/Scripty/master/sy.repo";
 
+    private final IOutput out;
     private final IOutput log;
     private final IOutput err;
 
@@ -38,7 +42,8 @@ public class ScriptyWorkspace {
 
     private final List<String> repositoryUrls = new ArrayList<>();
 
-    public ScriptyWorkspace(IOutput log, IOutput err) {
+    public ScriptyWorkspace(IOutput out, IOutput log, IOutput err) {
+        this.out = out;
         this.log = log;
         this.err = err;
     }
@@ -76,13 +81,9 @@ public class ScriptyWorkspace {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void _createSyRepoContent() throws IOException, ParseException {
-        JSONArray repoArray = new JSONArray();
-        repoArray.add(CONTENT_DEFAULT_REPO);
-
         try(FileWriter writer = new FileWriter(reposFile)){
-            writer.write(repoArray.toJSONString());
+            writer.write("[\n   \"" + CONTENT_DEFAULT_REPO + "\"\n]");
         }
     }
 
@@ -99,10 +100,8 @@ public class ScriptyWorkspace {
     }
 
     private void _createSyModulesContent() throws IOException, ParseException {
-        JSONObject modulesObject = new JSONObject();
-
-        try(FileWriter writer = new FileWriter(reposFile)){
-            writer.write(modulesObject.toJSONString());
+        try(FileWriter writer = new FileWriter(modulesFile)){
+            writer.write("{\n\n}");
         }
     }
 
@@ -127,16 +126,30 @@ public class ScriptyWorkspace {
             JSONObject modulesObject = (JSONObject) JSONUtils.readJsonFromFile(modulesFile);
             for(Object oModuleName : modulesObject.keySet()){
                 String moduleName = oModuleName.toString();
+                log.println("Checking Module [" + moduleName + "] ...");
 
                 Object oModuleDest = modulesObject.get(oModuleName);
                 String moduleDest = oModuleDest.toString();
 
+                if(_checkModuleExists(moduleDest)){
+                    continue;
+                }
+
+
+                log.println("Module not installed yet. Downloading it.");
                 _createModule(moduleName, moduleDest);
             }
         }
         catch (ParseException e){
             throw new IOException("Could not read [" + ERR_MODULES + "]'s content.", e);
         }
+    }
+
+    private boolean _checkModuleExists(String path){
+        File moduleFolder = new File(path);
+
+        //TODO: More in depth test if module is properly installed
+        return moduleFolder.exists();
     }
 
     private void _createModule(String name, String destination) throws IOException {
@@ -204,110 +217,111 @@ public class ScriptyWorkspace {
     }
 
     private void _copyModuleFromUrl(String moduleName, String url, String destination) throws IOException {
-        log.println("Downloading module [" + moduleName + "] ...");
+        try {
+            String moduleFileUrl = _ensureModuleUrl(url);
 
-        String moduleFileUrl = _ensureModuleUrl(url);
-
-        JSONObject moduleFileObject;
-        try{
-            moduleFileObject = (JSONObject) JSONUtils.readJsonFromUrl(moduleFileUrl);
-        }
-        catch (ParseException e){
-            throw new IOException("Could not read Module [" + moduleName + "] from url: " + moduleFileUrl);
-        }
-
-        Object oVersion = moduleFileObject.get("version");
-        String version = null;
-
-        if(oVersion == null){
-            log.println("Module [" + moduleName + "] does not specify a version.");
-        }
-        else {
-            version = oVersion.toString();
-        }
-
-        Object oAuthors = moduleFileObject.get("authors");
-        JSONArray authors = null;
-
-        if(oAuthors == null){
-            log.println("Module [" + moduleName + "] does not specify authors.");
-        }
-        else {
-            if(oVersion instanceof JSONArray) {
-                authors = (JSONArray) oVersion;
-            }
-            else {
-                err.println("Corrupted module [" + moduleName + "]. [authors] should be a List of Strings.");
-            }
-        }
-
-        Object oModulePackage = moduleFileObject.get("module-package");
-        String modulePackage = "";
-
-        if(oModulePackage != null){
-            modulePackage = oModulePackage.toString();
-        }
-
-        Object oModuleFiles = moduleFileObject.get("module-files");
-
-        if(!(oModuleFiles instanceof JSONArray)){
-            throw new IOException("Corrupted module [" + moduleName + "]. [module-files] should be a List of relative URLs.");
-        }
-
-        JSONArray moduleFiles = (JSONArray) oModuleFiles;
-        List<String> moduleFilesList = new ArrayList<>();
-
-        for(Object moduleFile : moduleFiles){
-            String path = moduleFile.toString();
-            moduleFilesList.add(path);
-        }
-
-        Object oModuleEntry = moduleFileObject.get("module-entry");
-
-        if(oModuleEntry == null){
-            throw new IOException("Corrupted module [" + moduleName + "]. [module-entry] should be a specified File.");
-        }
-
-
-        // --- ACTUAL DOWNLOAD ---
-        log.println("Downloading [" + moduleName + "]" + (version == null ? "" : " - v" + version) + "" + (authors == null ? "" : " - " + authors.toJSONString()));
-
-        // Copy the sy.module file
-        URL syModuleFileUrl = new File(moduleFileUrl).toURI().toURL();
-        String syModuleDest = _ensureUrlConcat(destination, FILE_SY_MODULE);
-
-        try (InputStream in = syModuleFileUrl.openStream()) {
-            Files.copy(in, Paths.get(syModuleDest));
-        }
-
-
-        // Copy the module-files
-
-        String modulePackagePath = _packageToUrl(modulePackage);
-        String baseUrl = _ensureUrlConcat(url, modulePackagePath);
-
-        for(String moduleFilePath : moduleFilesList){
-            String completeFilePath = _ensureUrlConcat(baseUrl, moduleFilePath);
-
-            //Files can specify the type or we will assume the file should be a .class file
-            completeFilePath = _ensureCorrectOrEnding(completeFilePath, ".class");
-
-            String fileDest = _ensureUrlConcat(destination, modulePackagePath, moduleFilePath);
-
-            URL completeFilePathUrl;
+            JSONObject moduleFileObject;
             try {
-                completeFilePathUrl = new File(completeFilePath).toURI().toURL();
-            }
-            catch (MalformedURLException e){
-                throw new IOException("Not a valid url: [" + completeFilePath + "].");
+                moduleFileObject = (JSONObject) JSONUtils.readJsonFromUrl(moduleFileUrl);
+            } catch (ParseException e) {
+                throw new IOException("Could not read Module [" + moduleName + "] from url: " + moduleFileUrl);
             }
 
-            try (InputStream in = completeFilePathUrl.openStream()){
-                Files.copy(in, Paths.get(fileDest));
+            Object oVersion = moduleFileObject.get("version");
+            String version = null;
+
+            if (oVersion == null) {
+                log.println("Module [" + moduleName + "] does not specify a version.");
+            } else {
+                version = oVersion.toString();
             }
+
+            Object oAuthors = moduleFileObject.get("authors");
+            JSONArray authors = null;
+
+            if (oAuthors == null) {
+                log.println("Module [" + moduleName + "] does not specify authors.");
+            } else {
+                if (oAuthors instanceof JSONArray) {
+                    authors = (JSONArray) oAuthors;
+                } else {
+                    err.println("Corrupted module [" + moduleName + "]. [authors] should be a List of Strings.");
+                }
+            }
+
+            Object oModulePackage = moduleFileObject.get("module-package");
+            String modulePackage = "";
+
+            if (oModulePackage != null) {
+                modulePackage = oModulePackage.toString();
+            }
+
+            Object oModuleFiles = moduleFileObject.get("module-files");
+
+            if (!(oModuleFiles instanceof JSONArray)) {
+                throw new IOException("Corrupted module [" + moduleName + "]. [module-files] should be a List of relative URLs.");
+            }
+
+            JSONArray moduleFiles = (JSONArray) oModuleFiles;
+            List<String> moduleFilesList = new ArrayList<>();
+
+            for (Object moduleFile : moduleFiles) {
+                String path = moduleFile.toString();
+                moduleFilesList.add(path);
+            }
+
+            Object oModuleEntry = moduleFileObject.get("module-entry");
+
+            if (oModuleEntry == null) {
+                throw new IOException("Corrupted module [" + moduleName + "]. [module-entry] should be a specified File.");
+            }
+
+
+            // --- ACTUAL DOWNLOAD ---
+            log.println("Downloading [" + moduleName + "]" + (version == null ? "" : " - v" + version) + "" + (authors == null ? "" : " by " + authors.toJSONString()));
+
+            // Copy the sy.module file
+            URL syModuleFileUrl = new URL(moduleFileUrl);
+            String syModuleDest = _ensureUrlConcat(destination, FILE_SY_MODULE);
+            _ensureFoldersForFile(syModuleDest);
+
+            try (InputStream in = syModuleFileUrl.openStream()) {
+                Files.copy(in, Paths.get(syModuleDest));
+            }
+
+
+            // Copy the module-files
+
+            String modulePackagePath = _packageToUrl(modulePackage);
+            String baseUrl = _ensureUrlConcat(url, modulePackagePath);
+
+            for (String moduleFilePath : moduleFilesList) {
+                //Files can specify the type or we will assume the file should be a .class file
+                moduleFilePath = _ensureCorrectOrEnding(moduleFilePath, ".class");
+
+                String completeFilePath = _ensureUrlConcat(baseUrl, moduleFilePath);
+
+                String fileDest = _ensureUrlConcat(destination, modulePackagePath, moduleFilePath);
+                _ensureFoldersForFile(fileDest);
+
+                URL completeFilePathUrl;
+                try {
+                    completeFilePathUrl = new URL(completeFilePath);
+                } catch (MalformedURLException e) {
+                    throw new IOException("Not a valid url: [" + completeFilePath + "].");
+                }
+
+                try (InputStream in = completeFilePathUrl.openStream()) {
+                    Files.copy(in, Paths.get(fileDest));
+                }
+            }
+
+            log.println("Downloaded module [" + moduleName + "].");
         }
-
-        log.println("Downloaded module [" + moduleName + "].");
+        catch (IOException e){
+            removeModuleFiles(destination);
+            throw e;
+        }
     }
 
     private String _ensureModuleUrl(String url){
@@ -361,15 +375,275 @@ public class ScriptyWorkspace {
         return file;
     }
 
+    private void _ensureFoldersForFile(String path) throws IOException {
+        int lastSlash = path.lastIndexOf('/');
+        if(lastSlash == -1 || lastSlash == 0) return;
 
-    // Loading and initializing modules into java
-    // > Should load the defined modules into classpath and init each module
+        String folderPath = path.substring(0, lastSlash);
+        File folder = new File(folderPath);
 
-    public void loadAndInitModules() {
-
+        if(!folder.mkdirs()){
+            throw new IOException("Could not create all folders for file: [" + path + "].");
+        }
     }
 
 
 
+
+    // Loading and initializing modules into java
+    // > Should load the defined modules into classpath and init each module
+
+    public void loadAndInitModules(ScriptyModulesManager modulesManager, CoreScriptyContext ctx) throws IOException {
+        try {
+            JSONObject modulesObject = (JSONObject) JSONUtils.readJsonFromFile(modulesFile);
+            URL[] urls = new URL[modulesObject.size()];
+            List<String> entryPoints = new ArrayList<>();
+            Map<String, ModuleFileConfig> moduleConfigs = new HashMap<>();
+
+            int i=0;
+            for(Object oModuleName : modulesObject.keySet()){
+                String moduleName = oModuleName.toString();
+
+                Object oModuleDest = modulesObject.get(oModuleName);
+                String moduleDest = oModuleDest.toString();
+
+                urls[i] = _getClasspathUrlForModule(moduleDest);
+
+                try {
+                    String moduleConfigFilePath = _ensureUrlConcat(moduleDest, FILE_SY_MODULE);
+                    ModuleFileConfig config = _readModuleConfig(moduleName, moduleConfigFilePath);
+
+                    String entryClassPath = config.getModulePackage() + "." + config.getModuleEntry();
+                    entryPoints.add(entryClassPath);
+                    moduleConfigs.put(entryClassPath, config);
+                }
+                catch (ParseException e){
+                    err.println("Could not read Module [" + moduleName + "]: " + e.getMessage());
+                }
+            }
+
+            modulesManager.initModules(urls, entryPoints, moduleConfigs, ctx);
+        }
+        catch (ParseException e){
+            throw new IOException("Could not read [" + ERR_MODULES + "]'s content.", e);
+        }
+    }
+
+    private ModuleFileConfig _readModuleConfig(String name, String path) throws IOException, ParseException{
+        Object oModuleObject = JSONUtils.readJsonFromPath(path);
+
+        if(!(oModuleObject instanceof JSONObject)){
+            throw new IOException("Module [" + name + "] is corrupted. It should be an JSONObject.");
+        }
+
+        JSONObject moduleFileObject = (JSONObject) oModuleObject;
+
+        Object oVersion = moduleFileObject.get("version");
+        String version = null;
+
+        if (oVersion == null) {
+            log.println("Module [" + name + "] does not specify a version.");
+        } else {
+            version = oVersion.toString();
+        }
+
+        Object oAuthors = moduleFileObject.get("authors");
+        JSONArray authors = null;
+
+        if (oAuthors == null) {
+            log.println("Module [" + name + "] does not specify authors.");
+        } else {
+            if (oAuthors instanceof JSONArray) {
+                authors = (JSONArray) oAuthors;
+            } else {
+                throw new IOException("Corrupted module [" + name + "]. [authors] should be a List of Strings.");
+            }
+        }
+
+        List<String> authorList = null;
+
+        if(authors != null) {
+            authorList = new ArrayList<>();
+            for (Object author : authors){
+                authorList.add(author.toString());
+            }
+        }
+
+
+        Object oModulePackage = moduleFileObject.get("module-package");
+        String modulePackage = "";
+
+        if (oModulePackage != null) {
+            modulePackage = oModulePackage.toString();
+        }
+
+        Object oModuleFiles = moduleFileObject.get("module-files");
+
+        if (!(oModuleFiles instanceof JSONArray)) {
+            throw new IOException("Corrupted module [" + name + "]. [module-files] should be a List of relative URLs.");
+        }
+
+        JSONArray moduleFiles = (JSONArray) oModuleFiles;
+        List<String> moduleFilesList = new ArrayList<>();
+
+        for (Object moduleFile : moduleFiles) {
+            String mPath = moduleFile.toString();
+            moduleFilesList.add(mPath);
+        }
+
+        Object oModuleEntry = moduleFileObject.get("module-entry");
+
+        if (oModuleEntry == null) {
+            throw new IOException("Corrupted module [" + name + "]. [module-entry] should be a specified File.");
+        }
+
+        String moduleEntry = oModuleEntry.toString();
+
+        return new ModuleFileConfig(name, version, authorList, modulePackage, moduleFilesList, moduleEntry);
+    }
+
+    private URL _getClasspathUrlForModule(String modulePath) throws IOException {
+        try {
+            return new URL(modulePath);
+        }
+        catch (MalformedURLException e){
+            return new File(modulePath).toURI().toURL();
+        }
+    }
+
+
+
+    // Add module to sy.modules file
+
+    @SuppressWarnings("unchecked")
+    public void addModule(String name, String destination) throws IOException{
+        String url = _lookupModuleName(name);
+
+        if(url == null){
+            err.println("Could not find a Module with name [" + name + "] in the specified repositories.");
+            return;
+        }
+
+        log.println("Adding Module [" + name + "] to workspace at [" + destination + "] ...");
+        try {
+            JSONObject modulesObject = (JSONObject) JSONUtils.readJsonFromFile(modulesFile);
+
+            if(modulesObject.containsKey(name)){
+                out.println("Module [" + name + "] already exists.");
+                return;
+            }
+
+            modulesObject.put(name, destination);
+
+            String content = modulesObject.toJSONString();
+            writeToFile(modulesFile, content);
+            log.println("Updated [" + ERR_MODULES + "].");
+
+            _copyModuleFromUrl(name, url, destination);
+        }
+        catch (ParseException e){
+            throw new IOException("Corrupted File: [" + ERR_MODULES + "]: ", e);
+        }
+
+        out.println("Added Module [" + name + "] at [" + destination + "].");
+    }
+
+    public void removeModule(String name) throws IOException{
+        log.println("Removing Module [" + name + "] ...");
+        try {
+            JSONObject modulesObject = (JSONObject) JSONUtils.readJsonFromFile(modulesFile);
+
+            if(!modulesObject.containsKey(name)){
+                out.println("No such module [" + name + "] installed.");
+                return;
+            }
+
+            String destination = modulesObject.remove(name).toString();
+
+            String content = modulesObject.toJSONString();
+            writeToFile(modulesFile, content);
+            log.println("Updated [" + ERR_MODULES + "].");
+
+
+            removeModuleFiles(destination);
+        }
+        catch (ParseException e){
+            throw new IOException("Corrupted File: [" + ERR_MODULES + "]: ", e);
+        }
+
+        log.println("Removed Module [" + name + "].");
+    }
+
+    public Map<String, String> listModules() throws IOException {
+        try {
+            JSONObject modulesObject = (JSONObject) JSONUtils.readJsonFromFile(modulesFile);
+
+            Map<String, String> modulesMap = new HashMap<>();
+
+            for(Object oKey : modulesObject.keySet()){
+                String key = oKey.toString();
+                String value = modulesObject.get(oKey).toString();
+
+                modulesMap.put(key, value);
+            }
+
+            return modulesMap;
+        }
+        catch (ParseException e){
+            throw new IOException("Corrupted File: [" + ERR_MODULES + "]: ", e);
+        }
+    }
+
+    private void writeToFile(File file, String content) throws IOException {
+        try(FileWriter writer = new FileWriter(file)){
+            writer.write(content);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+    private void removeModuleFiles(String destination){
+        File destFolder = new File(destination);
+        if(destFolder.exists()){
+            try {
+                recRemoveFile(destFolder);
+
+                if(!destFolder.delete()){
+                    err.println("Could not delete unfinished installed moduel at: " + destination);
+                }
+            }
+            catch (IOException e){
+                err.println(e.getMessage());
+            }
+        }
+    }
+
+    private void recRemoveFile(File file) throws IOException{
+        if(!file.exists() || file.isFile()) return;
+
+        File[] children = file.listFiles();
+        if(children != null){
+            for(File child : children){
+                recRemoveFile(child);
+                if(!child.delete()){
+                    throw new IOException("Could not delete file: [" + child.getAbsolutePath() + "].");
+                }
+            }
+        }
+    }
+
+
+
+
+    public String getWorkspacePath(){
+        return workspaceFolder.getAbsolutePath();
+    }
 
 }

@@ -12,7 +12,7 @@ public abstract class Module {
         onInit(context);
     }
 
-    public String getName() {
+    public final String getName() {
         return context.getModuleName();
     }
 }

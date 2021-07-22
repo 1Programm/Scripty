@@ -144,7 +144,15 @@ public class Args implements Iterable<String>{
         return Arrays.asList(args);
     }
 
+    public String nextNonOptional(){
+        for(String arg : args){
+            if(!arg.startsWith("-")){
+                return arg;
+            }
+        }
 
+        return null;
+    }
 
 
 
