@@ -278,7 +278,7 @@ public class ScriptyWorkspace {
 
 
             // --- ACTUAL DOWNLOAD ---
-            log.println("Downloading [" + moduleName + "]" + (version == null ? "" : " - v" + version) + "" + (authors == null ? "" : " by " + authors.toJSONString()));
+            out.println("Downloading [" + moduleName + "]" + (version == null ? "" : ", version: " + version) + "" + (authors == null ? "" : ", by " + authors.toJSONString()));
 
             // Copy the sy.module file
             URL syModuleFileUrl = new URL(moduleFileUrl);
@@ -314,6 +314,8 @@ public class ScriptyWorkspace {
                     throw new IOException("Not a valid url: [" + completeFilePath + "].");
                 }
 
+                out.println("Downloading [" + completeFilePath + "] ...");
+
                 try (InputStream in = completeFilePathUrl.openStream()) {
                     Files.copy(in, Paths.get(fileDest));
                 }
@@ -321,8 +323,6 @@ public class ScriptyWorkspace {
                     throw new IOException("Could not find or download file [" + completeFilePath + "].");
                 }
             }
-
-            log.println("Downloaded module [" + moduleName + "].");
         }
         catch (IOException e){
             removeModuleFiles(destination);
