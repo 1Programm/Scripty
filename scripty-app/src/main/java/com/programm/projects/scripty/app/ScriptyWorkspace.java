@@ -288,6 +288,9 @@ public class ScriptyWorkspace {
             try (InputStream in = syModuleFileUrl.openStream()) {
                 Files.copy(in, Paths.get(syModuleDest));
             }
+            catch (IOException e){
+                throw new IOException("Could not find or download file [" + moduleFileUrl + "].");
+            }
 
 
             // Copy the module-files
@@ -313,6 +316,9 @@ public class ScriptyWorkspace {
 
                 try (InputStream in = completeFilePathUrl.openStream()) {
                     Files.copy(in, Paths.get(fileDest));
+                }
+                catch (IOException e){
+                    throw new IOException("Could not find or download file [" + completeFilePath + "].");
                 }
             }
 
@@ -382,8 +388,10 @@ public class ScriptyWorkspace {
         String folderPath = path.substring(0, lastSlash);
         File folder = new File(folderPath);
 
-        if(!folder.mkdirs()){
-            throw new IOException("Could not create all folders for file: [" + path + "].");
+        if(!folder.exists()) {
+            if (!folder.mkdirs()) {
+                throw new IOException("Could not create all folders for file: [" + path + "].");
+            }
         }
     }
 
