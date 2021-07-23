@@ -550,7 +550,7 @@ class ScriptyWorkspace implements SyWorkspace {
     // Add module to sy.modules file
 
     @SuppressWarnings("unchecked")
-    public void addModule(String name, String destination) throws IOException{
+    public void addModule(String name, String destination, boolean silent) throws IOException{
         String url = _lookupModuleName(name);
 
         if(url == null){
@@ -563,7 +563,7 @@ class ScriptyWorkspace implements SyWorkspace {
             JSONObject modulesObject = (JSONObject) JSONUtils.readJsonFromFile(modulesFile);
 
             if(modulesObject.containsKey(name)){
-                io.out().println("Module [" + name + "] already exists.");
+                (silent ? io.log() : io.out()).println("Module [" + name + "] already exists.");
                 return;
             }
 
@@ -579,7 +579,7 @@ class ScriptyWorkspace implements SyWorkspace {
             throw new IOException("Corrupted File: [" + ERR_MODULES + "]: ", e);
         }
 
-        io.out().println("Added Module [" + name + "] at [" + destination + "].");
+        (silent ? io.log() : io.out()).println("Added Module [" + name + "] at [" + destination + "].");
     }
 
     public void removeModule(String name) throws IOException{
@@ -606,6 +606,63 @@ class ScriptyWorkspace implements SyWorkspace {
         }
 
         io.log().println("Removed Module [" + name + "].");
+    }
+
+    public void updateModule(String moduleName) throws IOException {
+        io.out().println("Updating [" + moduleName + "] ...");
+
+        Map<String, String> modulesMap = listModules();
+
+        if(!modulesMap.containsKey(moduleName)){
+            throw new IOException("Module [" + moduleName + "] is not an installed module.");
+        }
+
+        String moduleDest = modulesMap.get(moduleName);
+        ModuleFileConfig config;
+
+        try {
+            String moduleConfigFilePath = _ensureUrlConcat(moduleDest, FILE_SY_MODULE);
+            config = _readModuleConfig(moduleName, moduleConfigFilePath);
+
+        }
+        catch (ParseException e){
+            throw new IOException("Could not read module [" + moduleName + "]: " + e.getMessage());
+        }
+
+        String installedVersion = config.getVersion();
+
+        String url = _lookupModuleName(moduleName);
+
+        if(url == null){
+            io.err().println("Could not find a Module with name [" + moduleName + "] in the specified repositories.");
+            return;
+        }
+
+        String moduleFileUrl = _ensureModuleUrl(url);
+
+        JSONObject moduleFileObject;
+        try {
+            moduleFileObject = (JSONObject) JSONUtils.readJsonFromUrl(moduleFileUrl);
+        } catch (ParseException e) {
+            throw new IOException("Could not read Module [" + moduleName + "] from url: " + moduleFileUrl);
+        }
+
+        Object oVersion = moduleFileObject.get("version");
+        String version;
+
+        if (oVersion == null) {
+            throw new IOException("Module [" + moduleName + "] does not specify a version.");
+        } else {
+            version = oVersion.toString();
+        }
+
+        if(version.equals(installedVersion)){
+            io.out().println("Module [" + moduleName + "] already up to date (version " + version + ")");
+            return;
+        }
+
+        removeModule(moduleName);
+        addModule(moduleName, moduleDest, true);
     }
 
     public Map<String, String> listModules() throws IOException {

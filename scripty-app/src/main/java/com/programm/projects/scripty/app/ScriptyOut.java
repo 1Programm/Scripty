@@ -23,23 +23,13 @@ public class ScriptyOut implements IOutput {
     }
 
     @Override
-    public void println(String s) {
-        if(!enabled) return;
-        s = AlignmentFormatter.format(s);
-        out.println(s);
-    }
-
-    @Override
     public void newLine() {
         if(!enabled) return;
         out.println();
     }
 
-    public void enable(){
-        this.enabled = true;
-    }
-
-    public void disable(){
-        this.enabled = false;
+    @Override
+    public void enable(boolean enable) {
+        this.enabled = enable;
     }
 }

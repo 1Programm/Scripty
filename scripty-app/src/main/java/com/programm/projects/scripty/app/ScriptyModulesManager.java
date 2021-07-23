@@ -20,6 +20,7 @@ class ScriptyModulesManager {
 
     private final List<Module> modules = new ArrayList<>();
     private final Map<Module, ModuleFileConfig> moduleConfigs = new HashMap<>();
+    private final Map<String, Module> moduleMap = new HashMap<>();
 
     public ScriptyModulesManager(SyIO io) {
         this.io = io;
@@ -45,9 +46,9 @@ class ScriptyModulesManager {
             Module module = _initEntryClass(entryClass);
 
             if(module != null) {
-                module.setup(io);
                 modules.add(module);
                 moduleConfigs.put(module, config);
+                moduleMap.put(config.getName(), module);
             }
         }
     }
@@ -57,12 +58,7 @@ class ScriptyModulesManager {
         URLClassLoader classLoader = new URLClassLoader(urls);
 
         Class<?> entryClass = classLoader.loadClass(entryPoint);
-        Module module = _initEntryClass(entryClass);
-
-        if(module == null) return null;
-
-        module.setup(io);
-        return module;
+        return _initEntryClass(entryClass);
     }
 
     public void initRegisterCommands(ScriptyCommandManager commandManager){
@@ -71,12 +67,16 @@ class ScriptyModulesManager {
         }
     }
 
-    public void initModules(ScriptyCoreContext ctx){
+    public void initModules(ScriptyCoreContext ctx, ModuleIO moduleIO){
         // NOW INIT ALL MODULES
         io.log().println("Initializing Modules ...");
 
         for(Module module : modules){
+            ModuleFileConfig config = moduleConfigs.get(module);
+            moduleIO.setModuleName(config.getName());
+
             ModuleFileConfig moduleConfig = moduleConfigs.get(module);
+            module.setup(moduleIO);
             module.init(ctx, moduleConfig);
         }
 
@@ -108,6 +108,12 @@ class ScriptyModulesManager {
         }
 
         return null;
+    }
+
+    public ModuleFileConfig getConfig(String name){
+        Module m = moduleMap.get(name);
+        if(m == null) return null;
+        return moduleConfigs.get(m);
     }
 
 }

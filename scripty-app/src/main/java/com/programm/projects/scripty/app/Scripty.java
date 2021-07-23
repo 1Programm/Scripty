@@ -25,6 +25,7 @@ public class Scripty {
             commandManager.registerCommand("help", new CmdHelp());
             commandManager.registerCommand("modules-add", new CmdModulesAdd());
             commandManager.registerCommand("modules-remove", new CmdModulesRemove());
+            commandManager.registerCommand("modules-update", new CmdModulesUpdate());
             commandManager.registerCommand("modules-list", new CmdModulesList());
             commandManager.registerCommand("commands-list", new CmdCommandsList());
         }
@@ -48,19 +49,22 @@ public class Scripty {
     public void run(String command, Args args){
         int index_info = args.indexOf("-i");
 
+        ModuleIO moduleIO = new ModuleIO();
+
         if(index_info == -1){
             index_info = args.indexOf("--info");
         }
 
         if(index_info != -1){
             io.enableLog();
+            moduleIO.enableLog();
             args = args.removed(index_info);
         }
 
         try {
             workspace.loadModules(modulesManager);
             modulesManager.initRegisterCommands(commandManager);
-            modulesManager.initModules(context);
+            modulesManager.initModules(context, moduleIO);
         }
         catch (IOException e){
             io.err().println("Error while running command [" + command + "]: " + e.getMessage());

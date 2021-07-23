@@ -25,6 +25,6 @@ class ScriptyIO implements SyIO {
     }
 
     public void enableLog(){
-        log.enable();
+        log.enable(true);
     }
 }

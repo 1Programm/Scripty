@@ -2,8 +2,8 @@ package com.programm.projects.scripty.app;
 
 import com.programm.projects.scripty.core.Args;
 import com.programm.projects.scripty.core.IOutput;
+import com.programm.projects.scripty.core.ModuleFileConfig;
 import com.programm.projects.scripty.modules.api.CommandExecutionException;
-import com.programm.projects.scripty.modules.api.SyCommand;
 import com.programm.projects.scripty.modules.api.SyContext;
 import com.programm.projects.scripty.modules.api.SyIO;
 
@@ -14,11 +14,11 @@ class CmdModulesList implements SySysCommand {
 
     @Override
     public void run(SyContext ctx, SyIO io, String name, Args args) throws CommandExecutionException {
-        ScriptyWorkspace workspace = (ScriptyWorkspace) ctx.workspace();
+        ScriptyCoreContext context = (ScriptyCoreContext) ctx;
 
         Map<String, String> modules;
         try {
-            modules = workspace.listModules();
+            modules = context.workspace.listModules();
         } catch (IOException e) {
             throw new CommandExecutionException("Could not list modules: " + e.getMessage());
         }
@@ -30,7 +30,8 @@ class CmdModulesList implements SySysCommand {
 
         io.out().println("# Modules:");
         for(String moduleName : modules.keySet()){
-            io.out().println("| " + moduleName + " - " + modules.get(moduleName));
+            ModuleFileConfig config = context.modulesManager.getConfig(moduleName);
+            io.out().println("| " + moduleName + " - " + config.getVersion() + " - " + modules.get(moduleName));
         }
     }
 
