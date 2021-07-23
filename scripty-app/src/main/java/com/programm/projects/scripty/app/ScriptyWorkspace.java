@@ -609,8 +609,6 @@ class ScriptyWorkspace implements SyWorkspace {
     }
 
     public void updateModule(String moduleName) throws IOException {
-        io.out().println("Updating [" + moduleName + "] ...");
-
         Map<String, String> modulesMap = listModules();
 
         if(!modulesMap.containsKey(moduleName)){
@@ -661,6 +659,7 @@ class ScriptyWorkspace implements SyWorkspace {
             return;
         }
 
+        io.out().println("Updating [" + moduleName + "] ...");
         removeModule(moduleName);
         addModule(moduleName, moduleDest, true);
     }
