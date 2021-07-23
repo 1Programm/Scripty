@@ -276,7 +276,7 @@ class ScriptyWorkspace implements SyWorkspace {
 
 
             // --- ACTUAL DOWNLOAD ---
-            io.out().println("Downloading [" + moduleName + "]" + (version == null ? "" : ", version: " + version) + "" + (authors == null ? "" : ", by " + authors.toJSONString()));
+            (silent ? io.log() : io.out()).println("Downloading [" + moduleName + "]" + (version == null ? "" : ", version: " + version) + "" + (authors == null ? "" : ", by " + authors.toJSONString()));
 
             // Copy the sy.module file
             URL syModuleFileUrl = new URL(moduleFileUrl);
