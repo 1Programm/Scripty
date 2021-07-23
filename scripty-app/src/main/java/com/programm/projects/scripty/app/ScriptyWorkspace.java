@@ -2,6 +2,7 @@ package com.programm.projects.scripty.app;
 
 import com.programm.projects.scripty.core.IOutput;
 import com.programm.projects.scripty.core.ModuleFileConfig;
+import com.programm.projects.scripty.modules.api.SyWorkspace;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -19,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ScriptyWorkspace {
+class ScriptyWorkspace implements SyWorkspace {
 
     private static final String ERR_WORKSPACE = "Workspace Folder";
     private static final String ERR_REPOS = "Repositories Config File";
@@ -650,7 +651,8 @@ public class ScriptyWorkspace {
 
 
 
-    public String getWorkspacePath(){
+    @Override
+    public String workspacePath(){
         return workspaceFolder.getAbsolutePath();
     }
 

@@ -5,7 +5,7 @@ import com.programm.projects.scripty.core.ModuleFileConfig;
 import com.programm.projects.scripty.module.test.func.Function;
 import com.programm.projects.scripty.modules.api.CommandExecutionException;
 import com.programm.projects.scripty.modules.api.Module;
-import com.programm.projects.scripty.modules.api.ScriptyContext;
+import com.programm.projects.scripty.modules.api.SyContext;
 import com.programm.projects.scripty.modules.api.ex.InvalidNameException;
 
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.Scanner;
 public class TestModule extends Module {
 
     @Override
-    public void init(ScriptyContext context, ModuleFileConfig moduleConfig) {
+    public void init(SyContext context, ModuleFileConfig moduleConfig) {
         try {
             context.registerCommand("calc", this::math_calc);
         }
@@ -23,7 +23,7 @@ public class TestModule extends Module {
         }
     }
 
-    public void math_calc(ScriptyContext ctx, String name, Args args) throws CommandExecutionException {
+    public void math_calc(SyContext ctx, String name, Args args) throws CommandExecutionException {
         String rest = args.join();
 
         Function function = new Function(rest);

@@ -4,5 +4,5 @@ import com.programm.projects.scripty.core.ModuleFileConfig;
 
 public abstract class Module {
 
-    public abstract void init(ScriptyContext context, ModuleFileConfig moduleConfig);
+    public abstract void init(SyContext context, ModuleFileConfig moduleConfig);
 }

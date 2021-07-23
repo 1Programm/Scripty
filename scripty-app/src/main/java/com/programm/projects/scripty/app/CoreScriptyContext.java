@@ -1,25 +1,28 @@
 package com.programm.projects.scripty.app;
 
 import com.programm.projects.scripty.core.IOutput;
-import com.programm.projects.scripty.modules.api.ScriptyContext;
+import com.programm.projects.scripty.modules.api.SyContext;
 import com.programm.projects.scripty.modules.api.SyCommand;
+import com.programm.projects.scripty.modules.api.SyWorkspace;
 import com.programm.projects.scripty.modules.api.ex.InvalidNameException;
 
 import java.util.HashMap;
 import java.util.Map;
 
-class CoreScriptyContext implements ScriptyContext {
+class CoreScriptyContext implements SyContext {
 
     private final IOutput out;
     private final IOutput log;
     private final IOutput err;
+    private final SyWorkspace workspace;
 
     private final Map<String, SyCommand> commandMap = new HashMap<>();
 
-    public CoreScriptyContext(IOutput out, IOutput log, IOutput err) {
+    public CoreScriptyContext(IOutput out, IOutput log, IOutput err, SyWorkspace workspace) {
         this.out = out;
         this.log = log;
         this.err = err;
+        this.workspace = workspace;
     }
 
     @Override
@@ -38,12 +41,16 @@ class CoreScriptyContext implements ScriptyContext {
     }
 
     @Override
+    public SyWorkspace workspace() {
+        return workspace;
+    }
+
+    @Override
     public void registerCommand(String name, SyCommand command) throws InvalidNameException {
         if(name == null) throw new NullPointerException("Name cannot be null!");
         if(command == null) throw new NullPointerException("Command cannot be null!");
 
         _checkInvalidFormat(name);
-        _checkSystemCommands(name);
 
         if(commandMap.containsKey(name)){
             throw new InvalidNameException("Name is already used for a custom command!");
@@ -53,16 +60,8 @@ class CoreScriptyContext implements ScriptyContext {
     }
 
     private void _checkInvalidFormat(String name) throws InvalidNameException {
-        if(!(name.matches("[_a-zA-Z0-9]+"))){
+        if(!(name.matches("[_a-zA-Z0-9\\-]+"))){
             throw new InvalidNameException("Name must match the pattern: '[_a-zA-Z0-9]+'");
-        }
-    }
-
-    private void _checkSystemCommands(String name) throws InvalidNameException {
-        if(name.equals("modules-list")
-        || name.equals("modules-add")
-        || name.equals("modules-remove")){
-            throw new InvalidNameException("Name is used by a system command and therefore cannot be used!");
         }
     }
 

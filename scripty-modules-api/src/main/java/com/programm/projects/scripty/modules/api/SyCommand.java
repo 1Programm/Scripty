@@ -11,6 +11,6 @@ public interface SyCommand {
      * @param args the arguments given to this command when executing.
      * @throws CommandExecutionException when invalid arguments were given or some other failure happened.
      */
-    void run(ScriptyContext ctx, String name, Args args) throws CommandExecutionException;
+    void run(SyContext ctx, String name, Args args) throws CommandExecutionException;
 
 }
