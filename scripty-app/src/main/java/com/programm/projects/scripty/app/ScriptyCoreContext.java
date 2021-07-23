@@ -9,16 +9,16 @@ import com.programm.projects.scripty.modules.api.ex.InvalidNameException;
 import java.util.HashMap;
 import java.util.Map;
 
-class CoreScriptyContext implements SyContext {
+class ScriptyCoreContext implements SyContext {
 
     private final IOutput out;
     private final IOutput log;
     private final IOutput err;
     private final SyWorkspace workspace;
 
-    private final Map<String, SyCommand> commandMap = new HashMap<>();
+    final Map<String, SyCommand> commandMap = new HashMap<>();
 
-    public CoreScriptyContext(IOutput out, IOutput log, IOutput err, SyWorkspace workspace) {
+    public ScriptyCoreContext(IOutput out, IOutput log, IOutput err, SyWorkspace workspace) {
         this.out = out;
         this.log = log;
         this.err = err;

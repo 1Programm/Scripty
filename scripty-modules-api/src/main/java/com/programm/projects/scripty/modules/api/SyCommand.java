@@ -13,4 +13,12 @@ public interface SyCommand {
      */
     void run(SyContext ctx, String name, Args args) throws CommandExecutionException;
 
+    /**
+     * Method to collect information about a command.
+     * @return The Command-Information-Object.
+     */
+    default SyCommandInfo info(){
+        return null;
+    }
+
 }

@@ -402,7 +402,7 @@ class ScriptyWorkspace implements SyWorkspace {
     // Loading and initializing modules into java
     // > Should load the defined modules into classpath and init each module
 
-    public void loadAndInitModules(ScriptyModulesManager modulesManager, CoreScriptyContext ctx) throws IOException {
+    public void loadAndInitModules(ScriptyModulesManager modulesManager, ScriptyCoreContext ctx) throws IOException {
         try {
             JSONObject modulesObject = (JSONObject) JSONUtils.readJsonFromFile(modulesFile);
             URL[] urls = new URL[modulesObject.size()];

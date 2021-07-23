@@ -7,7 +7,7 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class JSONUtils {
+class JSONUtils {
 
     public static Object readJsonFromUrl(String url) throws IOException, ParseException {
         URL theUrl = new URL(url);

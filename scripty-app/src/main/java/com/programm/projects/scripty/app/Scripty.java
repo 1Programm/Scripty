@@ -3,6 +3,7 @@ package com.programm.projects.scripty.app;
 import com.programm.projects.scripty.core.Args;
 import com.programm.projects.scripty.modules.api.CommandExecutionException;
 import com.programm.projects.scripty.modules.api.SyCommand;
+import com.programm.projects.scripty.modules.api.SyContext;
 import com.programm.projects.scripty.modules.api.ex.InvalidNameException;
 
 import java.io.IOException;
@@ -15,17 +16,19 @@ public class Scripty {
 
     private final ScriptyWorkspace workspace;
     private final ScriptyModulesManager modulesManager;
-    private final CoreScriptyContext context;
+    private final ScriptyCoreContext context;
 
     public Scripty() {
         this.workspace = new ScriptyWorkspace(out, log, err);
         this.modulesManager = new ScriptyModulesManager(log, err);
-        this.context = new CoreScriptyContext(out, log, err, workspace);
+        this.context = new ScriptyCoreContext(out, log, err, workspace);
 
         try {
+            context.registerCommand("help", new CmdHelp());
             context.registerCommand("modules-add", new CmdModulesAdd());
             context.registerCommand("modules-remove", new CmdModulesRemove());
             context.registerCommand("modules-list", new CmdModulesList());
+            context.registerCommand("commands-list", new CmdCommandsList());
 
         }
         catch (InvalidNameException e){

@@ -1,5 +1,6 @@
 package com.programm.projects.scripty.app;
 
+import com.programm.projects.scripty.app.utils.AlignmentFormatter;
 import com.programm.projects.scripty.core.IOutput;
 
 import java.io.PrintStream;
@@ -17,12 +18,14 @@ public class ScriptyOut implements IOutput {
     @Override
     public void print(String s) {
         if(!enabled) return;
+        s = AlignmentFormatter.format(s);
         out.print(s);
     }
 
     @Override
     public void println(String s) {
         if(!enabled) return;
+        s = AlignmentFormatter.format(s);
         out.println(s);
     }
 

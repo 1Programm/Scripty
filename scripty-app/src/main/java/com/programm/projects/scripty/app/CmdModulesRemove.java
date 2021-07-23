@@ -1,13 +1,13 @@
 package com.programm.projects.scripty.app;
 
 import com.programm.projects.scripty.core.Args;
+import com.programm.projects.scripty.core.IOutput;
 import com.programm.projects.scripty.modules.api.CommandExecutionException;
-import com.programm.projects.scripty.modules.api.SyCommand;
 import com.programm.projects.scripty.modules.api.SyContext;
 
 import java.io.IOException;
 
-public class CmdModulesRemove implements SyCommand {
+class CmdModulesRemove implements SySysCommand {
 
     @Override
     public void run(SyContext ctx, String name, Args args) throws CommandExecutionException {
@@ -25,4 +25,11 @@ public class CmdModulesRemove implements SyCommand {
             throw new CommandExecutionException("Could not remove module [" + moduleName + "]: " + e.getMessage());
         }
     }
+
+    @Override
+    public void printHelp(IOutput out) {
+        //TODO
+        out.println("TODO");
+    }
+
 }

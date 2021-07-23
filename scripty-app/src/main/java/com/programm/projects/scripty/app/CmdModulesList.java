@@ -1,6 +1,7 @@
 package com.programm.projects.scripty.app;
 
 import com.programm.projects.scripty.core.Args;
+import com.programm.projects.scripty.core.IOutput;
 import com.programm.projects.scripty.modules.api.CommandExecutionException;
 import com.programm.projects.scripty.modules.api.SyCommand;
 import com.programm.projects.scripty.modules.api.SyContext;
@@ -8,7 +9,7 @@ import com.programm.projects.scripty.modules.api.SyContext;
 import java.io.IOException;
 import java.util.Map;
 
-public class CmdModulesList implements SyCommand {
+class CmdModulesList implements SySysCommand {
 
     @Override
     public void run(SyContext ctx, String name, Args args) throws CommandExecutionException {
@@ -31,4 +32,11 @@ public class CmdModulesList implements SyCommand {
             ctx.out().println("| " + moduleName + " - " + modules.get(moduleName));
         }
     }
+
+    @Override
+    public void printHelp(IOutput out) {
+        //TODO
+        out.println("TODO");
+    }
+
 }

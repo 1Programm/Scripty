@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ScriptyModulesManager {
+class ScriptyModulesManager {
 
     private final IOutput log;
     private final IOutput err;
@@ -26,7 +26,7 @@ public class ScriptyModulesManager {
         this.err = err;
     }
 
-    public void initModules(URL[] classPaths, List<String> entryPoints, Map<String, ModuleFileConfig> namedModuleConfigs, CoreScriptyContext ctx){
+    public void initModules(URL[] classPaths, List<String> entryPoints, Map<String, ModuleFileConfig> namedModuleConfigs, ScriptyCoreContext ctx){
         log.println("Adding [" + classPaths.length + "] classPaths to ClassLoader ...");
 
         URLClassLoader classLoader = new URLClassLoader(classPaths);
