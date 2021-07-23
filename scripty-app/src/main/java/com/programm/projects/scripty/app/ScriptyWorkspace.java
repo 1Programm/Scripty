@@ -157,7 +157,7 @@ class ScriptyWorkspace implements SyWorkspace {
             throw new IOException("Could not find module with name: [" + name + "].");
         }
 
-        _copyModuleFromUrl(name, moduleUrl, destination);
+        _copyModuleFromUrl(name, moduleUrl, destination, false);
     }
 
     private String _lookupModuleName(String name) throws IOException {
@@ -214,7 +214,7 @@ class ScriptyWorkspace implements SyWorkspace {
         return null;
     }
 
-    private void _copyModuleFromUrl(String moduleName, String url, String destination) throws IOException {
+    private void _copyModuleFromUrl(String moduleName, String url, String destination, boolean silent) throws IOException {
         try {
             String moduleFileUrl = _ensureModuleUrl(url);
 
@@ -312,7 +312,7 @@ class ScriptyWorkspace implements SyWorkspace {
                     throw new IOException("Not a valid url: [" + completeFilePath + "].");
                 }
 
-                io.out().println("Downloading [" + completeFilePath + "] ...");
+                (silent ? io.log() : io.out()).println("Downloading [" + completeFilePath + "] ...");
 
                 try (InputStream in = completeFilePathUrl.openStream()) {
                     Files.copy(in, Paths.get(fileDest));
@@ -573,7 +573,7 @@ class ScriptyWorkspace implements SyWorkspace {
             writeToFile(modulesFile, content);
             io.log().println("Updated [" + ERR_MODULES + "].");
 
-            _copyModuleFromUrl(name, url, destination);
+            _copyModuleFromUrl(name, url, destination, silent);
         }
         catch (ParseException e){
             throw new IOException("Corrupted File: [" + ERR_MODULES + "]: ", e);
