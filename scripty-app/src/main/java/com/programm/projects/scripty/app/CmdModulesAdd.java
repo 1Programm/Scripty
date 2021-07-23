@@ -3,7 +3,9 @@ package com.programm.projects.scripty.app;
 import com.programm.projects.scripty.core.Args;
 import com.programm.projects.scripty.core.IOutput;
 import com.programm.projects.scripty.modules.api.CommandExecutionException;
+import com.programm.projects.scripty.modules.api.Module;
 import com.programm.projects.scripty.modules.api.SyContext;
+import com.programm.projects.scripty.modules.api.SyIO;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,13 +14,13 @@ import java.util.List;
 class CmdModulesAdd implements SySysCommand {
 
     @Override
-    public void run(SyContext ctx, String name, Args args) throws CommandExecutionException {
+    public void run(SyContext ctx, SyIO io, String name, Args args) throws CommandExecutionException {
         ScriptyCoreContext context = (ScriptyCoreContext) ctx;
 
         String moduleName = args.size() == 0 ? null : args.get(0);
 
         if(moduleName == null){
-            ctx.err().println("Invalid args. Expected 'modules-add [name] ([path])'");
+            io.err().println("Invalid args. Expected 'modules-add [name] ([path])'");
             return;
         }
 
@@ -29,17 +31,25 @@ class CmdModulesAdd implements SySysCommand {
         }
 
         try {
-            List<String> cmdNamesOld = new ArrayList<>(context.commandMap.keySet());
+            context.workspace.addModule(moduleName, moduleDest);
+            Module module = context.workspace.loadSingleModule(context.modulesManager, moduleName);
 
-            ((ScriptyWorkspace) ctx.workspace()).addModule(moduleName, moduleDest);
+            ScriptyCommandManager commandManager = new ScriptyCommandManager();
+            module.registerCommands(commandManager);
 
-            List<String> cmdNamesNew = new ArrayList<>(context.commandMap.keySet());
 
-            cmdNamesNew.removeAll(cmdNamesOld);
+            List<String> cmdNamesNew = new ArrayList<>(commandManager.commandMap.keySet());
             cmdNamesNew.sort(String::compareToIgnoreCase);
 
-            for(String cmdName : cmdNamesNew){
-                ctx.out().println("=> Added new command: [" + cmdName + "].");
+            if(cmdNamesNew.size() != 0) {
+                io.out().newLine();
+                io.out().println("### New from [" + moduleName + "]:");
+
+                io.out().newLine();
+                io.out().println("# Commands");
+                for (String cmdName : cmdNamesNew) {
+                    io.out().println("=> New command: %20>([" + cmdName + "])");
+                }
             }
         }
         catch (IOException e){

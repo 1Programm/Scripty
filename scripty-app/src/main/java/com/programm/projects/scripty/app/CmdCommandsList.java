@@ -2,10 +2,7 @@ package com.programm.projects.scripty.app;
 
 import com.programm.projects.scripty.core.Args;
 import com.programm.projects.scripty.core.IOutput;
-import com.programm.projects.scripty.modules.api.CommandExecutionException;
-import com.programm.projects.scripty.modules.api.SyCommand;
-import com.programm.projects.scripty.modules.api.SyCommandInfo;
-import com.programm.projects.scripty.modules.api.SyContext;
+import com.programm.projects.scripty.modules.api.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,19 +10,19 @@ import java.util.List;
 class CmdCommandsList implements SySysCommand {
 
     @Override
-    public void run(SyContext ctx, String name, Args args) throws CommandExecutionException {
+    public void run(SyContext ctx, SyIO io, String name, Args args) throws CommandExecutionException {
         ScriptyCoreContext context = (ScriptyCoreContext) ctx;
 
-        List<String> commands = new ArrayList<>(context.commandMap.keySet());
+        List<String> commands = new ArrayList<>(context.commandManager.commandMap.keySet());
         commands.sort(String::compareToIgnoreCase);
 
-        ctx.out().println("# Commands:");
+        io.out().println("# Commands:");
         for(String command : commands){
-            SyCommand cmd = context.getCommand(command);
+            SyCommand cmd = context.commandManager.commandMap.get(command);
             SyCommandInfo info = cmd.info();
 
             if(info == null){
-                ctx.out().println("| " + command);
+                io.out().println("| " + command);
             }
             else {
                 String type = info.type();
@@ -36,7 +33,7 @@ class CmdCommandsList implements SySysCommand {
                     }
                 }
 
-                ctx.out().println("| %20<(" + command + ") [" + type + "]");
+                io.out().println("| %20<(" + command + ") [" + type + "]");
             }
         }
     }

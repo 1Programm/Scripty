@@ -5,6 +5,7 @@ import com.programm.projects.scripty.core.IOutput;
 import com.programm.projects.scripty.modules.api.CommandExecutionException;
 import com.programm.projects.scripty.modules.api.SyCommand;
 import com.programm.projects.scripty.modules.api.SyContext;
+import com.programm.projects.scripty.modules.api.SyIO;
 
 import java.io.IOException;
 import java.util.Map;
@@ -12,7 +13,7 @@ import java.util.Map;
 class CmdModulesList implements SySysCommand {
 
     @Override
-    public void run(SyContext ctx, String name, Args args) throws CommandExecutionException {
+    public void run(SyContext ctx, SyIO io, String name, Args args) throws CommandExecutionException {
         ScriptyWorkspace workspace = (ScriptyWorkspace) ctx.workspace();
 
         Map<String, String> modules;
@@ -23,13 +24,13 @@ class CmdModulesList implements SySysCommand {
         }
 
         if(modules.size() == 0){
-            ctx.out().println("No modules installed. Try 'sy modules-add [name]' to add a module.");
+            io.out().println("No modules installed. Try 'sy modules-add [name]' to add a module.");
             return;
         }
 
-        ctx.out().println("# Modules:");
+        io.out().println("# Modules:");
         for(String moduleName : modules.keySet()){
-            ctx.out().println("| " + moduleName + " - " + modules.get(moduleName));
+            io.out().println("| " + moduleName + " - " + modules.get(moduleName));
         }
     }
 

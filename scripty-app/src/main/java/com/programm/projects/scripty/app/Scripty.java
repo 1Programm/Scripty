@@ -2,34 +2,31 @@ package com.programm.projects.scripty.app;
 
 import com.programm.projects.scripty.core.Args;
 import com.programm.projects.scripty.modules.api.CommandExecutionException;
-import com.programm.projects.scripty.modules.api.SyCommand;
-import com.programm.projects.scripty.modules.api.SyContext;
 import com.programm.projects.scripty.modules.api.ex.InvalidNameException;
 
 import java.io.IOException;
 
 public class Scripty {
 
-    private final ScriptyOut out = new ScriptyOut(System.out, true);
-    private final ScriptyOut log = new ScriptyOut(System.out, false);
-    private final ScriptyOut err = new ScriptyOut(System.err, true);
-
+    private final ScriptyIO io;
     private final ScriptyWorkspace workspace;
     private final ScriptyModulesManager modulesManager;
+    private final ScriptyCommandManager commandManager;
     private final ScriptyCoreContext context;
 
     public Scripty() {
-        this.workspace = new ScriptyWorkspace(out, log, err);
-        this.modulesManager = new ScriptyModulesManager(log, err);
-        this.context = new ScriptyCoreContext(out, log, err, workspace);
+        this.io = new ScriptyIO();
+        this.workspace = new ScriptyWorkspace(io);
+        this.modulesManager = new ScriptyModulesManager(io);
+        this.commandManager = new ScriptyCommandManager();
+        this.context = new ScriptyCoreContext(io, workspace, modulesManager, commandManager);
 
         try {
-            context.registerCommand("help", new CmdHelp());
-            context.registerCommand("modules-add", new CmdModulesAdd());
-            context.registerCommand("modules-remove", new CmdModulesRemove());
-            context.registerCommand("modules-list", new CmdModulesList());
-            context.registerCommand("commands-list", new CmdCommandsList());
-
+            commandManager.registerCommand("help", new CmdHelp());
+            commandManager.registerCommand("modules-add", new CmdModulesAdd());
+            commandManager.registerCommand("modules-remove", new CmdModulesRemove());
+            commandManager.registerCommand("modules-list", new CmdModulesList());
+            commandManager.registerCommand("commands-list", new CmdCommandsList());
         }
         catch (InvalidNameException e){
             throw new IllegalStateException("This should not happen.", e);
@@ -37,13 +34,13 @@ public class Scripty {
     }
 
     public void init(String workspacePath){
-        log.println("Initializing Workspace ...");
+        io.log().println("Initializing Workspace ...");
 
         try {
             workspace.setupWorkspace(workspacePath);
         }
         catch (Exception e){
-            err.println("Error while initializing workspace: " + e.getMessage());
+            io.err().println("Error while initializing workspace: " + e.getMessage());
             System.exit(-1);
         }
     }
@@ -56,30 +53,24 @@ public class Scripty {
         }
 
         if(index_info != -1){
-            log.enable();
+            io.enableLog();
             args = args.removed(index_info);
         }
 
         try {
-            //First init Modules and then check custom commands
-            workspace.loadAndInitModules(modulesManager, context);
-
-            SyCommand cmd = context.getCommand(command);
-
-            if(cmd == null){
-                err.println("No such command: [" + command + "].");
-                return;
-            }
-
-            try {
-                cmd.run(context, command, args);
-            }
-            catch (CommandExecutionException e){
-                err.println("Error executing command [" + command + "]: " + e.getMessage());
-            }
+            workspace.loadModules(modulesManager);
+            modulesManager.initRegisterCommands(commandManager);
+            modulesManager.initModules(context);
         }
         catch (IOException e){
-            err.println("Error while running command [" + command + "]: " + e.getMessage());
+            io.err().println("Error while running command [" + command + "]: " + e.getMessage());
+        }
+
+        try {
+            context.run(command, args);
+        }
+        catch (CommandExecutionException e){
+            io.err().println("[" + command + "]: " + e.getMessage());
         }
     }
 

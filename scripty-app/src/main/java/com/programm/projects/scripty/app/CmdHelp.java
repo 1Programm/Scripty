@@ -2,24 +2,21 @@ package com.programm.projects.scripty.app;
 
 import com.programm.projects.scripty.core.Args;
 import com.programm.projects.scripty.core.IOutput;
-import com.programm.projects.scripty.modules.api.CommandExecutionException;
-import com.programm.projects.scripty.modules.api.SyCommand;
-import com.programm.projects.scripty.modules.api.SyCommandInfo;
-import com.programm.projects.scripty.modules.api.SyContext;
+import com.programm.projects.scripty.modules.api.*;
 
 public class CmdHelp implements SySysCommand {
 
     @Override
-    public void run(SyContext ctx, String name, Args args) throws CommandExecutionException {
+    public void run(SyContext ctx, SyIO io, String name, Args args) throws CommandExecutionException {
         if(args.size() == 0){
-            printHelp(ctx.out());
+            printHelp(io.out());
             return;
         }
 
         ScriptyCoreContext context = (ScriptyCoreContext) ctx;
 
         String commandName = args.get(0);
-        SyCommand command = context.getCommand(commandName);
+        SyCommand command = context.commandManager.commandMap.get(commandName);
 
         if(command == null){
             throw new CommandExecutionException("Command [" + commandName + "] not found.");
@@ -31,7 +28,7 @@ public class CmdHelp implements SySysCommand {
             throw new CommandExecutionException("Command [" + commandName + "] does not provide help.");
         }
 
-        info.printHelp(ctx.out());
+        info.printHelp(io.out());
     }
 
     @Override

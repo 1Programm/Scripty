@@ -1,38 +1,24 @@
 package com.programm.projects.scripty.modules.api;
 
-import com.programm.projects.scripty.core.IOutput;
-import com.programm.projects.scripty.modules.api.ex.InvalidNameException;
+import com.programm.projects.scripty.core.Args;
 
 public interface SyContext {
-
-    /**
-     * @return The standard console output which can always be seen.
-     */
-    IOutput out();
-
-    /**
-     * @return The logging output which can only be seen when the -i / --info flag was given to scripty
-     */
-    IOutput log();
-
-    /**
-     * @return The error logging. Use to print error messages when the error itself is nothing 'internat'. Otherwise throw Exceptions.
-     */
-    IOutput err();
 
     /**
      * @return The workspace which handles File Management
      */
     SyWorkspace workspace();
 
-
     /**
-     * Method to register a command.
-     * @param name The name with which the command should be called.
-     * @param command The actual command.
-     * @throws InvalidNameException when [name] is already bound to a command or is in an invalid format (No special characters like: '%', '$', ...).
-     * @throws NullPointerException when [name] or [command] is null;
+     * Method to run some command.
+     * @param command The name of the command.
+     * @param args The arguments which should be processed.
+     * @throws CommandExecutionException when there are invalid commands or some other 'internal' error happened.
      */
-    void registerCommand(String name, SyCommand command) throws InvalidNameException;
+    void run(String command, Args args) throws CommandExecutionException;
+
+    default void run(String command, String... args) throws CommandExecutionException{
+        run(command, new Args(args));
+    }
 
 }

@@ -3,9 +3,8 @@ package com.programm.projects.scripty.module.test;
 import com.programm.projects.scripty.core.Args;
 import com.programm.projects.scripty.core.ModuleFileConfig;
 import com.programm.projects.scripty.module.test.func.Function;
-import com.programm.projects.scripty.modules.api.CommandExecutionException;
+import com.programm.projects.scripty.modules.api.*;
 import com.programm.projects.scripty.modules.api.Module;
-import com.programm.projects.scripty.modules.api.SyContext;
 import com.programm.projects.scripty.modules.api.ex.InvalidNameException;
 
 import java.util.List;
@@ -14,20 +13,25 @@ import java.util.Scanner;
 public class TestModule extends Module {
 
     @Override
-    public void init(SyContext context, ModuleFileConfig moduleConfig) {
+    public void registerCommands(SyCommandManager commandManager) {
         try {
-            context.registerCommand("calc", this::math_calc);
+            commandManager.registerCommand("calc", this::math_calc);
         }
         catch (InvalidNameException e){
-            context.err().println("Error registering command: " + e.getMessage());
+            err().println("Error registering command: " + e.getMessage());
         }
     }
 
-    public void math_calc(SyContext ctx, String name, Args args) throws CommandExecutionException {
+    @Override
+    public void init(SyContext context, ModuleFileConfig moduleConfig) {
+        out().println("Test Module says Hello :D");
+    }
+
+    public void math_calc(SyContext ctx, SyIO io, String name, Args args) throws CommandExecutionException {
         String rest = args.join();
 
         Function function = new Function(rest);
-        ctx.out().println(function.toString());
+        io.out().println(function.toString());
 
 
         List<String> neededVars = function.getNeededVarNames();
@@ -37,12 +41,12 @@ public class TestModule extends Module {
             Double value = null;
 
             while(value == null) {
-                ctx.out().print("What should [" + var + "] be: ");
+                io.out().print("What should [" + var + "] be: ");
                 String in = scanner.nextLine();
                 try {
                     value = Double.parseDouble(in);
                 } catch (NumberFormatException e) {
-                    ctx.err().println("Invalid number!");
+                    io.err().println("Invalid number!");
                 }
             }
 
@@ -53,6 +57,6 @@ public class TestModule extends Module {
 
         double result = function.run();
 
-        ctx.out().println("Result: " + result);
+        io.out().println("Result: " + result);
     }
 }

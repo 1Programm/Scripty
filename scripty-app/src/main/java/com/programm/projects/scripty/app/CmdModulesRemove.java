@@ -4,17 +4,18 @@ import com.programm.projects.scripty.core.Args;
 import com.programm.projects.scripty.core.IOutput;
 import com.programm.projects.scripty.modules.api.CommandExecutionException;
 import com.programm.projects.scripty.modules.api.SyContext;
+import com.programm.projects.scripty.modules.api.SyIO;
 
 import java.io.IOException;
 
 class CmdModulesRemove implements SySysCommand {
 
     @Override
-    public void run(SyContext ctx, String name, Args args) throws CommandExecutionException {
+    public void run(SyContext ctx, SyIO io, String name, Args args) throws CommandExecutionException {
         String moduleName = args.size() == 0 ? null : args.get(0);
 
         if(moduleName == null){
-            ctx.err().println("Invalid args. Expected 'modules-remove [name]'");
+            io.err().println("Invalid args. Expected 'modules-remove [name]'");
             return;
         }
 

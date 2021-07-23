@@ -4,11 +4,12 @@ import com.programm.projects.scripty.core.Args;
 import com.programm.projects.scripty.core.IOutput;
 import com.programm.projects.scripty.modules.api.CommandExecutionException;
 import com.programm.projects.scripty.modules.api.SyContext;
+import com.programm.projects.scripty.modules.api.SyIO;
 
 class CmdModulesUpdate implements SySysCommand {
 
     @Override
-    public void run(SyContext ctx, String name, Args args) throws CommandExecutionException {
+    public void run(SyContext ctx, SyIO io, String name, Args args) throws CommandExecutionException {
 
     }
 

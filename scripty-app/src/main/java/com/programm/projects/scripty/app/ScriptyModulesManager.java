@@ -3,6 +3,7 @@ package com.programm.projects.scripty.app;
 import com.programm.projects.scripty.core.IOutput;
 import com.programm.projects.scripty.core.ModuleFileConfig;
 import com.programm.projects.scripty.modules.api.Module;
+import com.programm.projects.scripty.modules.api.SyIO;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -15,19 +16,17 @@ import java.util.Map;
 
 class ScriptyModulesManager {
 
-    private final IOutput log;
-    private final IOutput err;
+    private final SyIO io;
 
     private final List<Module> modules = new ArrayList<>();
     private final Map<Module, ModuleFileConfig> moduleConfigs = new HashMap<>();
 
-    public ScriptyModulesManager(IOutput log, IOutput err) {
-        this.log = log;
-        this.err = err;
+    public ScriptyModulesManager(SyIO io) {
+        this.io = io;
     }
 
-    public void initModules(URL[] classPaths, List<String> entryPoints, Map<String, ModuleFileConfig> namedModuleConfigs, ScriptyCoreContext ctx){
-        log.println("Adding [" + classPaths.length + "] classPaths to ClassLoader ...");
+    public void loadModules(URL[] classPaths, List<String> entryPoints, Map<String, ModuleFileConfig> namedModuleConfigs){
+        io.log().println("Adding [" + classPaths.length + "] classPaths to ClassLoader ...");
 
         URLClassLoader classLoader = new URLClassLoader(classPaths);
 
@@ -38,33 +37,58 @@ class ScriptyModulesManager {
                 entryClass = classLoader.loadClass(entry);
             }
             catch (ClassNotFoundException e){
-                err.println("Could not find entry-point class: [" + entry + "].");
+                io.err().println("Could not find entry-point class: [" + entry + "].");
                 continue;
             }
 
             ModuleFileConfig config = namedModuleConfigs.get(entry);
-            _initEntryClass(entryClass, config);
+            Module module = _initEntryClass(entryClass);
+
+            if(module != null) {
+                module.setup(io);
+                modules.add(module);
+                moduleConfigs.put(module, config);
+            }
         }
+    }
 
+    public Module loadSingleModule(URL classPath, String entryPoint) throws ClassNotFoundException {
+        URL[] urls = new URL[]{ classPath };
+        URLClassLoader classLoader = new URLClassLoader(urls);
 
+        Class<?> entryClass = classLoader.loadClass(entryPoint);
+        Module module = _initEntryClass(entryClass);
 
+        if(module == null) return null;
+
+        module.setup(io);
+        return module;
+    }
+
+    public void initRegisterCommands(ScriptyCommandManager commandManager){
+        for(Module module : modules){
+            module.registerCommands(commandManager);
+        }
+    }
+
+    public void initModules(ScriptyCoreContext ctx){
         // NOW INIT ALL MODULES
-        log.println("Initializing Modules ...");
+        io.log().println("Initializing Modules ...");
 
         for(Module module : modules){
             ModuleFileConfig moduleConfig = moduleConfigs.get(module);
             module.init(ctx, moduleConfig);
         }
 
-        log.println("Finished initialization of Modules.");
+        io.log().println("Finished initialization of Modules.");
     }
 
-    private void _initEntryClass(Class<?> cls, ModuleFileConfig config){
+    private Module _initEntryClass(Class<?> cls){
         if(Module.class.isAssignableFrom(cls)){
-            Module module = _createModule(cls);
-            modules.add(module);
-            moduleConfigs.put(module, config);
+            return _createModule(cls);
         }
+
+        return null;
     }
 
     private Module _createModule(Class<?> moduleClass){
@@ -74,13 +98,13 @@ class ScriptyModulesManager {
             return (Module) oModule;
         }
         catch (NoSuchMethodException e){
-            err.println("No empty constructor defined for class: [" + moduleClass.getName() + "].");
+            io.err().println("No empty constructor defined for class: [" + moduleClass.getName() + "].");
         } catch (InvocationTargetException e) {
-            err.println("Empty constructor of class: [" + moduleClass.getName() + "] threw an Error: " + e.getMessage());
+            io.err().println("Empty constructor of class: [" + moduleClass.getName() + "] threw an Error: " + e.getMessage());
         } catch (InstantiationException e) {
-            err.println("Cannot instantiate class: [" + moduleClass.getName() + "] as it is abstract.");
+            io.err().println("Cannot instantiate class: [" + moduleClass.getName() + "] as it is abstract.");
         } catch (IllegalAccessException e) {
-            err.println("Empty constructor of class: [" + moduleClass.getName() + "] could not be accessed.");
+            io.err().println("Empty constructor of class: [" + moduleClass.getName() + "] could not be accessed.");
         }
 
         return null;
