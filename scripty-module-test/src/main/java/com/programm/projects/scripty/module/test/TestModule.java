@@ -24,7 +24,8 @@ public class TestModule extends Module {
 
     @Override
     public void init(SyContext context, ModuleFileConfig moduleConfig) {
-        out().println("Test Module says Hello :D");
+        out().println("Hello :D");
+        out().println("At your service.");
     }
 
     public void math_calc(SyContext ctx, SyIO io, String name, Args args) throws CommandExecutionException {
