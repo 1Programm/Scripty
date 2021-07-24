@@ -49,17 +49,26 @@ Not supported yet!
 ## The 'sy' Command:
 
 ### Usage:
+```
+sy [scripty-optionals] [command] [command-args]
+```
+
+####Scripty-Optionals
 |Optional|Description|
 |---|---|
 |-i / --info|Prints more debug info when running the command.|
 |-v / --version|Prints the version of scripty and exits.|
 |-h / --help|Prints Help and exits.|
 
+####Builtin-Commands
 ```
-sy [command]            -> Runs the command [command]
-sy uninstall (--yes)    -> Uninstall Scripty (--yes forces the uninstallation)
-sy update               -> Update to latest version.
-sy status               -> Checks and prints the current status of scripty.
-sy module-add [name]    -> Searches in [sy-repositories] for the module [name] and addes the module.
-sy module-remove [name] -> Removes the module [name].
+uninstall (--yes)           -> Uninstall Scripty (--yes forces the uninstallation)
+update                      -> Update to latest version.
+modules-add [name] ([dest]) -> Searches in [sy-repositories] for the module [name] and addes the module at the [dest] - path. 
+                               (If no [dest] is specified it will install the module at [scripty-home]/modules/[name]/)
+modules-remove [name]       -> Removes the module [name].
+modules-update ([name])     -> Updates a module specified by [name]. If no name is specified it will update all installed modules.
+modules-list                -> Lists all installed modules.
+modules-dev                 -> A command to manage the development of a custom module. It will start an interactive conversation to help you set up a module or update it.
+commands-list               -> Lists all installed commands.
 ```

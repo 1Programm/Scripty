@@ -1,5 +1,6 @@
 package com.programm.projects.scripty.modules.api;
 
+import com.programm.projects.scripty.core.IInput;
 import com.programm.projects.scripty.core.IOutput;
 
 public interface SyIO {
@@ -18,5 +19,10 @@ public interface SyIO {
      * @return The error logging. Use to print error messages when the error itself is nothing 'internal'. Otherwise throw Exceptions.
      */
     IOutput err();
+
+    /**
+     * @return The input handle. Use to get access to user input.
+     */
+    IInput in();
 
 }

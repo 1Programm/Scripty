@@ -28,8 +28,12 @@ public class ScriptyOut implements IOutput {
         out.println();
     }
 
-    @Override
     public void enable(boolean enable) {
         this.enabled = enable;
+    }
+
+    @Override
+    public boolean enabled() {
+        return enabled;
     }
 }

@@ -16,7 +16,13 @@ public class CmdHelp implements SySysCommand {
         ScriptyCoreContext context = (ScriptyCoreContext) ctx;
 
         String commandName = args.get(0);
-        SyCommand command = context.commandManager.commandMap.get(commandName);
+        SyCommand command;
+
+        command = context.commandManager.systemCommands.get(commandName);
+
+        if(command == null) {
+            command = context.commandManager.commandMap.get(commandName);
+        }
 
         if(command == null){
             throw new CommandExecutionException("Command [" + commandName + "] not found.");

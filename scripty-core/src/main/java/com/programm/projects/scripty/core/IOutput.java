@@ -5,7 +5,7 @@ public interface IOutput {
     void print(String s);
     void newLine();
 
-    void enable(boolean enable);
+    boolean enabled();
 
     default void println(String s){
         print(s);

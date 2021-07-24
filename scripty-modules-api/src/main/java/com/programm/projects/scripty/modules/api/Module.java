@@ -1,5 +1,6 @@
 package com.programm.projects.scripty.modules.api;
 
+import com.programm.projects.scripty.core.IInput;
 import com.programm.projects.scripty.core.IOutput;
 import com.programm.projects.scripty.core.ModuleFileConfig;
 
@@ -28,5 +29,10 @@ public abstract class Module implements SyIO {
     @Override
     public IOutput err() {
         return io.err();
+    }
+
+    @Override
+    public IInput in() {
+        return io.in();
     }
 }

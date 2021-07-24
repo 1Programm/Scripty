@@ -135,6 +135,16 @@ public class Args implements Iterable<String>{
         return false;
     }
 
+    public boolean containsEither(String... values){
+        for(String arg : args){
+            for(String val : values) {
+                if (arg.equals(val)) return true;
+            }
+        }
+
+        return false;
+    }
+
     public int indexOf(String arg){
         for(int i=0;i<args.length;i++){
             if(args[i].equals(arg)) return i;

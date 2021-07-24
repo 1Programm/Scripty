@@ -9,6 +9,7 @@ import java.util.Map;
 
 class ScriptyCommandManager implements SyCommandManager {
 
+    final Map<String, SySysCommand> systemCommands = new HashMap<>();
     final Map<String, SyCommand> commandMap = new HashMap<>();
 
     @Override
@@ -17,6 +18,14 @@ class ScriptyCommandManager implements SyCommandManager {
         if(command == null) throw new NullPointerException("Command cannot be null!");
 
         _checkInvalidFormat(name);
+
+        if(command instanceof SySysCommand){
+            if(systemCommands.containsKey(name)){
+                throw new IllegalStateException("Name [" + name + "] is already used for SYSTEM-COMMANDS!");
+            }
+
+            systemCommands.put(name, (SySysCommand) command);
+        }
 
         if(commandMap.containsKey(name)){
             throw new InvalidNameException("Name is already used for a custom command!");

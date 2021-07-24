@@ -1,15 +1,17 @@
-package com.programm.projects.scripty.core;
+package com.programm.projects.scripty.app;
 
-public class PrependOut implements IOutput {
+import com.programm.projects.scripty.core.IOutput;
 
-    private final IOutput out;
+class PrependOut implements IOutput {
+
+    private final ScriptyOut out;
     private String prepend;
 
-    public PrependOut(IOutput out) {
+    public PrependOut(ScriptyOut out) {
         this.out = out;
     }
 
-    public PrependOut(IOutput out, String prepend) {
+    public PrependOut(ScriptyOut out, String prepend) {
         this.out = out;
         this.prepend = prepend;
     }
@@ -24,9 +26,13 @@ public class PrependOut implements IOutput {
         out.newLine();
     }
 
-    @Override
     public void enable(boolean enable) {
         out.enable(enable);
+    }
+
+    @Override
+    public boolean enabled() {
+        return out.enabled();
     }
 
     public void setPrepend(String prepend) {

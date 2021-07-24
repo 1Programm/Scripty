@@ -4,8 +4,6 @@ import com.programm.projects.scripty.core.Args;
 import com.programm.projects.scripty.modules.api.CommandExecutionException;
 import com.programm.projects.scripty.modules.api.ex.InvalidNameException;
 
-import java.io.IOException;
-
 public class Scripty {
 
     private final ScriptyIO io;
@@ -27,6 +25,7 @@ public class Scripty {
             commandManager.registerCommand("modules-remove", new CmdModulesRemove());
             commandManager.registerCommand("modules-update", new CmdModulesUpdate());
             commandManager.registerCommand("modules-list", new CmdModulesList());
+            commandManager.registerCommand("modules-dev", new CmdModulesDev());
             commandManager.registerCommand("commands-list", new CmdCommandsList());
         }
         catch (InvalidNameException e){
@@ -34,7 +33,7 @@ public class Scripty {
         }
     }
 
-    public void init(String workspacePath){
+    public void init(String workspacePath, String userPath){
         io.log().println("Initializing Workspace ...");
 
         try {
@@ -46,32 +45,45 @@ public class Scripty {
         }
     }
 
-    public void run(String command, Args args){
-        int index_info = args.indexOf("-i");
+    public void run(Args args){
+        int indexNextCommand = -1;
+        boolean infoEnabled = false;
+
+        for(int i=0;i<args.size();i++){
+            String arg = args.get(i);
+
+            if(!arg.startsWith("-")){
+                indexNextCommand = i;
+                break;
+            }
+            else if(arg.equals("-i") || arg.equals("--info")){
+                infoEnabled = true;
+            }
+            // Other Scripty optionals here in future
+        }
+
+        if(indexNextCommand == -1){
+            System.out.println("No command specified!");
+            System.exit(-1);
+        }
+
+        String command = args.get(indexNextCommand);
+        Args commandArgs = args.sub(indexNextCommand + 1);
+
+
+
+
+
 
         ModuleIO moduleIO = new ModuleIO();
 
-        if(index_info == -1){
-            index_info = args.indexOf("--info");
-        }
-
-        if(index_info != -1){
+        if(infoEnabled){
             io.enableLog();
             moduleIO.enableLog();
-            args = args.removed(index_info);
         }
 
         try {
-            workspace.loadModules(modulesManager);
-            modulesManager.initRegisterCommands(commandManager);
-            modulesManager.initModules(context, moduleIO);
-        }
-        catch (IOException e){
-            io.err().println("Error while running command [" + command + "]: " + e.getMessage());
-        }
-
-        try {
-            context.run(command, args);
+            context.initRun(command, commandArgs, moduleIO);
         }
         catch (CommandExecutionException e){
             io.err().println("[" + command + "]: " + e.getMessage());
