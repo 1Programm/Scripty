@@ -1,17 +1,14 @@
 package com.programm.projects.scripty.app;
 
-import com.programm.projects.scripty.core.ModuleFileConfig;
 import com.programm.projects.scripty.modules.api.Module;
 import com.programm.projects.scripty.modules.api.SyIO;
+import com.programm.projects.scripty.modules.api.SyModuleConfig;
 import com.programm.projects.scripty.modules.api.SyWorkspace;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -35,6 +32,7 @@ class ScriptyWorkspace implements SyWorkspace {
     private final SyIO io;
 
     private File workspaceFolder;
+    private String userPath;
 
     //Config files
     private File reposFile;
@@ -49,8 +47,9 @@ class ScriptyWorkspace implements SyWorkspace {
     // Setting up the Workspace
     // > This should load, create and check the [workspace-folder, sy.repos-file, sy.modules-file] if they exist
 
-    public void setupWorkspace(String workspace) throws IOException {
+    public void setupWorkspace(String workspace, String userPath) throws IOException {
         workspaceFolder = FileUtils.getCreateDir(workspace, ERR_WORKSPACE);
+        this.userPath = userPath;
 
         reposFile = new File(workspaceFolder, FILE_SY_REPOS);
         if(!reposFile.exists()){
@@ -218,88 +217,29 @@ class ScriptyWorkspace implements SyWorkspace {
         try {
             String moduleFileUrl = _ensureModuleUrl(url);
 
-            JSONObject moduleFileObject;
+            ScriptyModuleConfig config;
             try {
-                moduleFileObject = (JSONObject) JSONUtils.readJsonFromUrl(moduleFileUrl);
+                config = _readModuleConfig(moduleName, moduleFileUrl);
             } catch (ParseException e) {
                 throw new IOException("Could not read Module [" + moduleName + "] from url: " + moduleFileUrl);
             }
 
-            Object oVersion = moduleFileObject.get("version");
-            String version = null;
-
-            if (oVersion == null) {
-                io.log().println("Module [" + moduleName + "] does not specify a version.");
-            } else {
-                version = oVersion.toString();
-            }
-
-            Object oAuthors = moduleFileObject.get("authors");
-            JSONArray authors = null;
-
-            if (oAuthors == null) {
-                io.log().println("Module [" + moduleName + "] does not specify authors.");
-            } else {
-                if (oAuthors instanceof JSONArray) {
-                    authors = (JSONArray) oAuthors;
-                } else {
-                    io.err().println("Corrupted module [" + moduleName + "]. [authors] should be a List of Strings.");
-                }
-            }
-
-            Object oModulePackage = moduleFileObject.get("module-package");
-            String modulePackage = "";
-
-            if (oModulePackage != null) {
-                modulePackage = oModulePackage.toString();
-            }
-
-            Object oModuleFiles = moduleFileObject.get("module-files");
-
-            if (!(oModuleFiles instanceof JSONArray)) {
-                throw new IOException("Corrupted module [" + moduleName + "]. [module-files] should be a List of relative URLs.");
-            }
-
-            JSONArray moduleFiles = (JSONArray) oModuleFiles;
-            List<String> moduleFilesList = new ArrayList<>();
-
-            for (Object moduleFile : moduleFiles) {
-                String path = moduleFile.toString();
-                moduleFilesList.add(path);
-            }
-
-            Object oModuleEntry = moduleFileObject.get("module-entry");
-
-            if (oModuleEntry == null) {
-                throw new IOException("Corrupted module [" + moduleName + "]. [module-entry] should be a specified File.");
-            }
-
 
             // --- ACTUAL DOWNLOAD ---
-            (silent ? io.log() : io.out()).println("Downloading [" + moduleName + "]" + (version == null ? "" : ", version: " + version) + "" + (authors == null ? "" : ", by " + authors.toJSONString()));
+            (silent ? io.log() : io.out()).println("Downloading [" + moduleName + "], version: " + config.version() + ", by " + config.authors());
 
             // Copy the sy.module file
-            URL syModuleFileUrl = new URL(moduleFileUrl);
             String syModuleDest = _ensureUrlConcat(destination, FILE_SY_MODULE);
             _ensureFoldersForFile(syModuleDest);
 
-            try (InputStream in = syModuleFileUrl.openStream()) {
-                Files.copy(in, Paths.get(syModuleDest));
-            }
-            catch (IOException e){
-                throw new IOException("Could not find or download file [" + moduleFileUrl + "].");
-            }
+            String actualRootFolder = config.rootFolder;
+            config.rootFolder = "";
+            writeModuleConfigFile(config, new File(syModuleDest));
 
+            String modulePackagePath = _packageToUrl(config.rootPackage());
+            String baseUrl = _ensureUrlConcat(url, actualRootFolder, modulePackagePath);
 
-            // Copy the module-files
-
-            String modulePackagePath = _packageToUrl(modulePackage);
-            String baseUrl = _ensureUrlConcat(url, modulePackagePath);
-
-            for (String moduleFilePath : moduleFilesList) {
-                //Files can specify the type or we will assume the file should be a .class file
-                moduleFilePath = _ensureCorrectOrEnding(moduleFilePath, ".class");
-
+            for (String moduleFilePath : config.files()) {
                 String completeFilePath = _ensureUrlConcat(baseUrl, moduleFilePath);
 
                 String fileDest = _ensureUrlConcat(destination, modulePackagePath, moduleFilePath);
@@ -406,19 +346,26 @@ class ScriptyWorkspace implements SyWorkspace {
 
         URL[] urls = new URL[modulesMap.size()];
         List<String> entryPoints = new ArrayList<>();
-        Map<String, ModuleFileConfig> moduleConfigs = new HashMap<>();
+        Map<String, SyModuleConfig> moduleConfigs = new HashMap<>();
 
         int i=0;
         for(String moduleName : modulesMap.keySet()){
             String moduleDest = modulesMap.get(moduleName);
 
-            urls[i] = _getClasspathUrlForModule(moduleDest);
+            urls[i] = _tryCleanOrFileURL(moduleDest);
 
             try {
                 String moduleConfigFilePath = _ensureUrlConcat(moduleDest, FILE_SY_MODULE);
-                ModuleFileConfig config = _readModuleConfig(moduleName, moduleConfigFilePath);
+                SyModuleConfig config = _readModuleConfig(moduleName, moduleConfigFilePath);
 
-                String entryClassPath = config.getModulePackage() + "." + config.getModuleEntry();
+                String moduleEntryFile = config.moduleEntry();
+
+                //IT SHOULD
+                if(moduleEntryFile.endsWith(".class")){
+                    moduleEntryFile = moduleEntryFile.substring(0, moduleEntryFile.length() - 6);
+                }
+
+                String entryClassPath = config.rootPackage() + "." + moduleEntryFile;
                 entryPoints.add(entryClassPath);
                 moduleConfigs.put(entryClassPath, config);
             }
@@ -439,13 +386,22 @@ class ScriptyWorkspace implements SyWorkspace {
 
         String moduleDest = modulesMap.get(moduleName);
 
-        URL moduleClassPathUrl = _getClasspathUrlForModule(moduleDest);
-
         try {
             String moduleConfigFilePath = _ensureUrlConcat(moduleDest, FILE_SY_MODULE);
-            ModuleFileConfig config = _readModuleConfig(moduleName, moduleConfigFilePath);
+            SyModuleConfig config = _readModuleConfig(moduleName, moduleConfigFilePath);
 
-            String entryClassPath = config.getModulePackage() + "." + config.getModuleEntry();
+            String rootFolder = config.rootFolder();
+            String moduleEntryFile = config.moduleEntry();
+
+            //IT SHOULD
+            if(moduleEntryFile.endsWith(".class")){
+                moduleEntryFile = moduleEntryFile.substring(0, moduleEntryFile.length() - 6);
+            }
+
+            String entryClassPath = config.rootPackage() + "." + moduleEntryFile;
+
+            String moduleRootClassPath = _ensureUrlConcat(moduleDest, rootFolder);
+            URL moduleClassPathUrl = _tryCleanOrFileURL(moduleRootClassPath);
 
             Module module = modulesManager.loadSingleModule(moduleClassPathUrl, entryClassPath);
 
@@ -463,8 +419,9 @@ class ScriptyWorkspace implements SyWorkspace {
         }
     }
 
-    private ModuleFileConfig _readModuleConfig(String name, String path) throws IOException, ParseException{
-        Object oModuleObject = JSONUtils.readJsonFromPath(path);
+    private ScriptyModuleConfig _readModuleConfig(String name, String path) throws IOException, ParseException{
+        URL url = _tryCleanOrFileURL(path);
+        Object oModuleObject = JSONUtils.readJsonFromUrl(url);
 
         if(!(oModuleObject instanceof JSONObject)){
             throw new IOException("Module [" + name + "] is corrupted. It should be an JSONObject.");
@@ -503,18 +460,24 @@ class ScriptyWorkspace implements SyWorkspace {
             }
         }
 
+        Object oModuleFolder = moduleFileObject.get("root-folder");
+        String moduleFolder = "";
 
-        Object oModulePackage = moduleFileObject.get("module-package");
+        if(oModuleFolder != null){
+            moduleFolder = oModuleFolder.toString();
+        }
+
+        Object oModulePackage = moduleFileObject.get("root-package");
         String modulePackage = "";
 
         if (oModulePackage != null) {
             modulePackage = oModulePackage.toString();
         }
 
-        Object oModuleFiles = moduleFileObject.get("module-files");
+        Object oModuleFiles = moduleFileObject.get("files");
 
         if (!(oModuleFiles instanceof JSONArray)) {
-            throw new IOException("Corrupted module [" + name + "]. [module-files] should be a List of relative URLs.");
+            throw new IOException("Corrupted module [" + name + "]. [files] should be a List of relative URLs.");
         }
 
         JSONArray moduleFiles = (JSONArray) oModuleFiles;
@@ -533,10 +496,10 @@ class ScriptyWorkspace implements SyWorkspace {
 
         String moduleEntry = oModuleEntry.toString();
 
-        return new ModuleFileConfig(name, version, authorList, modulePackage, moduleFilesList, moduleEntry);
+        return new ScriptyModuleConfig(name, version, authorList, moduleFolder, modulePackage, moduleFilesList, moduleEntry);
     }
 
-    private URL _getClasspathUrlForModule(String modulePath) throws IOException {
+    private URL _tryCleanOrFileURL(String modulePath) throws IOException {
         try {
             return new URL(modulePath);
         }
@@ -616,7 +579,7 @@ class ScriptyWorkspace implements SyWorkspace {
         }
 
         String moduleDest = modulesMap.get(moduleName);
-        ModuleFileConfig config;
+        SyModuleConfig config;
 
         try {
             String moduleConfigFilePath = _ensureUrlConcat(moduleDest, FILE_SY_MODULE);
@@ -627,7 +590,7 @@ class ScriptyWorkspace implements SyWorkspace {
             throw new IOException("Could not read module [" + moduleName + "]: " + e.getMessage());
         }
 
-        String installedVersion = config.getVersion();
+        String installedVersion = config.version();
 
         String url = _lookupModuleName(moduleName);
 
@@ -729,6 +692,31 @@ class ScriptyWorkspace implements SyWorkspace {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public void writeModuleConfigFile(SyModuleConfig config, File file) throws IOException{
+        JSONObject moduleObject = new JSONObject();
+        moduleObject.put("name", config.name());
+        moduleObject.put("version", config.version());
+
+        JSONArray authorsArray = new JSONArray();
+        authorsArray.addAll(config.authors());
+
+        moduleObject.put("authors", authorsArray);
+        moduleObject.put("root-folder", config.rootFolder());
+        moduleObject.put("root-package", config.rootPackage());
+
+        JSONArray filesArray = new JSONArray();
+        filesArray.addAll(config.files());
+
+        moduleObject.put("files", filesArray);
+        moduleObject.put("module-entry", config.moduleEntry());
+
+
+        try (Writer writer = new FileWriter(file)){
+            moduleObject.writeJSONString(writer);
+        }
+    }
+
 
 
 
@@ -737,4 +725,8 @@ class ScriptyWorkspace implements SyWorkspace {
         return workspaceFolder.getAbsolutePath();
     }
 
+    @Override
+    public String userPath() {
+        return userPath;
+    }
 }

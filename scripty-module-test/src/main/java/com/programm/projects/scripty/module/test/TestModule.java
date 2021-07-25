@@ -1,10 +1,9 @@
 package com.programm.projects.scripty.module.test;
 
 import com.programm.projects.scripty.core.Args;
-import com.programm.projects.scripty.core.ModuleFileConfig;
 import com.programm.projects.scripty.module.test.func.Function;
-import com.programm.projects.scripty.modules.api.*;
 import com.programm.projects.scripty.modules.api.Module;
+import com.programm.projects.scripty.modules.api.*;
 import com.programm.projects.scripty.modules.api.ex.InvalidNameException;
 
 import java.util.List;
@@ -23,7 +22,7 @@ public class TestModule extends Module {
     }
 
     @Override
-    public void init(SyContext context, ModuleFileConfig moduleConfig) {
+    public void init(SyContext context, SyModuleConfig moduleConfig) {
         out().println("Hello :D");
         out().println("At your service.");
     }

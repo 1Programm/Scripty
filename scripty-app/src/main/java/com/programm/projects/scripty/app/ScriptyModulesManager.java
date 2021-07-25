@@ -1,9 +1,8 @@
 package com.programm.projects.scripty.app;
 
-import com.programm.projects.scripty.core.IOutput;
-import com.programm.projects.scripty.core.ModuleFileConfig;
 import com.programm.projects.scripty.modules.api.Module;
 import com.programm.projects.scripty.modules.api.SyIO;
+import com.programm.projects.scripty.modules.api.SyModuleConfig;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -19,14 +18,14 @@ class ScriptyModulesManager {
     private final SyIO io;
 
     private final List<Module> modules = new ArrayList<>();
-    private final Map<Module, ModuleFileConfig> moduleConfigs = new HashMap<>();
+    private final Map<Module, SyModuleConfig> moduleConfigs = new HashMap<>();
     private final Map<String, Module> moduleMap = new HashMap<>();
 
     public ScriptyModulesManager(SyIO io) {
         this.io = io;
     }
 
-    public void loadModules(URL[] classPaths, List<String> entryPoints, Map<String, ModuleFileConfig> namedModuleConfigs){
+    public void loadModules(URL[] classPaths, List<String> entryPoints, Map<String, SyModuleConfig> namedModuleConfigs){
         io.log().println("Adding [" + classPaths.length + "] classPaths to ClassLoader ...");
 
         URLClassLoader classLoader = new URLClassLoader(classPaths);
@@ -42,13 +41,13 @@ class ScriptyModulesManager {
                 continue;
             }
 
-            ModuleFileConfig config = namedModuleConfigs.get(entry);
+            SyModuleConfig config = namedModuleConfigs.get(entry);
             Module module = _initEntryClass(entryClass);
 
             if(module != null) {
                 modules.add(module);
                 moduleConfigs.put(module, config);
-                moduleMap.put(config.getName(), module);
+                moduleMap.put(config.name(), module);
             }
         }
     }
@@ -72,12 +71,11 @@ class ScriptyModulesManager {
         io.log().println("Initializing Modules ...");
 
         for(Module module : modules){
-            ModuleFileConfig config = moduleConfigs.get(module);
-            moduleIO.setModuleName(config.getName());
+            SyModuleConfig config = moduleConfigs.get(module);
+            moduleIO.setModuleName(config.name());
 
-            ModuleFileConfig moduleConfig = moduleConfigs.get(module);
             module.setup(moduleIO);
-            module.init(ctx, moduleConfig);
+            module.init(ctx, config);
         }
 
         io.log().println("Finished initialization of Modules.");
@@ -110,7 +108,7 @@ class ScriptyModulesManager {
         return null;
     }
 
-    public ModuleFileConfig getConfig(String name){
+    public SyModuleConfig getConfig(String name){
         Module m = moduleMap.get(name);
         if(m == null) return null;
         return moduleConfigs.get(m);

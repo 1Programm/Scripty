@@ -10,8 +10,11 @@ import java.net.URLConnection;
 class JSONUtils {
 
     public static Object readJsonFromUrl(String url) throws IOException, ParseException {
-        URL theUrl = new URL(url);
-        URLConnection connection = theUrl.openConnection();
+        return readJsonFromUrl(new URL(url));
+    }
+
+    public static Object readJsonFromUrl(URL url) throws IOException, ParseException {
+        URLConnection connection = url.openConnection();
         InputStream in = connection.getInputStream();
 
         return readJson(in);

@@ -14,13 +14,13 @@ import java.util.List;
 class CmdModulesAdd implements SySysCommand {
 
     @Override
-    public void run(SyContext ctx, SyIO io, String name, Args args) throws CommandExecutionException {
+    public void run(SyContext ctx, SyIO io, String commandName, Args args) throws CommandExecutionException {
         ScriptyCoreContext context = (ScriptyCoreContext) ctx;
 
         String moduleName = args.size() == 0 ? null : args.get(0);
 
         if(moduleName == null){
-            io.err().println("Invalid args. Expected 'modules-add [name] ([path])'");
+            io.err().println("Invalid args. Expected '" + commandName + " [name] ([path])'");
             return;
         }
 

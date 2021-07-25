@@ -2,7 +2,6 @@ package com.programm.projects.scripty.modules.api;
 
 import com.programm.projects.scripty.core.IInput;
 import com.programm.projects.scripty.core.IOutput;
-import com.programm.projects.scripty.core.ModuleFileConfig;
 
 public abstract class Module implements SyIO {
 
@@ -14,7 +13,7 @@ public abstract class Module implements SyIO {
 
     public abstract void registerCommands(SyCommandManager commandManager);
 
-    public abstract void init(SyContext context, ModuleFileConfig moduleConfig);
+    public abstract void init(SyContext context, SyModuleConfig moduleConfig);
 
     @Override
     public IOutput out() {

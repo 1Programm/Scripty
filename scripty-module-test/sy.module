@@ -1,0 +1,27 @@
+{
+  "name": "test-module",
+  "version": "1.1-SNAPSHOT",
+  "authors": ["Programm"],
+
+  "root-folder": "module",
+  "root-package": "com.programm.projects.scripty.module.test",
+  "files": [
+    "TestModule.class",
+    "func/DivByZeroNode.class",
+    "func/DivisionByZeroException.class",
+    "func/FContext.class",
+    "func/FFunction.class",
+    "func/FNode.class",
+    "func/Function.class",
+    "func/FunctionAnalyzer.class",
+    "func/FunctionNode.class",
+    "func/FunctionParseException.class",
+    "func/FunctionParser.class",
+    "func/IFunction.class",
+    "func/OperationNode.class",
+    "func/StringUtils.class",
+    "func/ValueNode.class",
+    "func/VarNode.class"
+  ],
+  "module-entry": "TestModule.class"
+}

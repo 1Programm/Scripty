@@ -34,10 +34,8 @@ public class Scripty {
     }
 
     public void init(String workspacePath, String userPath){
-        io.log().println("Initializing Workspace ...");
-
         try {
-            workspace.setupWorkspace(workspacePath);
+            workspace.setupWorkspace(workspacePath, userPath);
         }
         catch (Exception e){
             io.err().println("Error while initializing workspace: " + e.getMessage());

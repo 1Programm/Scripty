@@ -12,7 +12,7 @@ import java.util.Map;
 class CmdModulesUpdate implements SySysCommand {
 
     @Override
-    public void run(SyContext ctx, SyIO io, String name, Args args) throws CommandExecutionException {
+    public void run(SyContext ctx, SyIO io, String commandName, Args args) throws CommandExecutionException {
         ScriptyCoreContext context = (ScriptyCoreContext) ctx;
 
         if(args.size() == 0){

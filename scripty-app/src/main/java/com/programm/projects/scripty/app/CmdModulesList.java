@@ -2,10 +2,10 @@ package com.programm.projects.scripty.app;
 
 import com.programm.projects.scripty.core.Args;
 import com.programm.projects.scripty.core.IOutput;
-import com.programm.projects.scripty.core.ModuleFileConfig;
 import com.programm.projects.scripty.modules.api.CommandExecutionException;
 import com.programm.projects.scripty.modules.api.SyContext;
 import com.programm.projects.scripty.modules.api.SyIO;
+import com.programm.projects.scripty.modules.api.SyModuleConfig;
 
 import java.io.IOException;
 import java.util.Map;
@@ -13,7 +13,7 @@ import java.util.Map;
 class CmdModulesList implements SySysCommand {
 
     @Override
-    public void run(SyContext ctx, SyIO io, String name, Args args) throws CommandExecutionException {
+    public void run(SyContext ctx, SyIO io, String commandName, Args args) throws CommandExecutionException {
         ScriptyCoreContext context = (ScriptyCoreContext) ctx;
 
         Map<String, String> modules;
@@ -30,8 +30,8 @@ class CmdModulesList implements SySysCommand {
 
         io.out().println("# Modules:");
         for(String moduleName : modules.keySet()){
-            ModuleFileConfig config = context.modulesManager.getConfig(moduleName);
-            io.out().println("| " + moduleName + " - " + config.getVersion() + " - " + modules.get(moduleName));
+            SyModuleConfig config = context.modulesManager.getConfig(moduleName);
+            io.out().println("| " + moduleName + " - " + config.version() + " - " + modules.get(moduleName));
         }
     }
 

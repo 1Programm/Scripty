@@ -4,7 +4,7 @@
   "modules": [
     {
       "name": "test-module",
-      "url": "https://raw.githubusercontent.com/1Programm/Scripty/master/scripty-module-test/module"
+      "url": "https://raw.githubusercontent.com/1Programm/Scripty/master/scripty-module-test"
     }
   ]
 }
