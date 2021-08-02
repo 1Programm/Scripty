@@ -53,22 +53,31 @@ Not supported yet!
 sy [scripty-optionals] [command] [command-args]
 ```
 
-####Scripty-Optionals
+#### Scripty-Optionals
 |Optional|Description|
 |---|---|
 |-i / --info|Prints more debug info when running the command.|
 |-v / --version|Prints the version of scripty and exits.|
 |-h / --help|Prints Help and exits.|
 
-####Builtin-Commands
+#### Builtin-Commands
 ```
+help                        -> Help command.
 uninstall (--yes)           -> Uninstall Scripty (--yes forces the uninstallation)
 update                      -> Update to latest version.
+modules-list                -> Lists all installed modules.
 modules-add [name] ([dest]) -> Searches in [sy-repositories] for the module [name] and addes the module at the [dest] - path. 
                                (If no [dest] is specified it will install the module at [scripty-home]/modules/[name]/)
 modules-remove [name]       -> Removes the module [name].
 modules-update ([name])     -> Updates a module specified by [name]. If no name is specified it will update all installed modules.
-modules-list                -> Lists all installed modules.
-modules-dev                 -> A command to manage the development of a custom module. It will start an interactive conversation to help you set up a module or update it.
+modules-dev                 -> *1
 commands-list               -> Lists all installed commands.
+repos-list                  -> Lists all specified repositories under which new modules will be discovered.
+repos-add [url]             -> Add a new repository for discovery from [url].
+repos-remove [url]          -> Removes a specific repository [url] from discovery.
 ```
+
+##### *1 [modules-dev]:
+A command to manage the development of a custom module.\
+It will start an interactive conversation to help you set up a module or to update it. \
+You will answer questions which can be answered by either a normal answer or by pressing only enter which takes the default to that question as an answer.

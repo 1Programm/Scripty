@@ -14,8 +14,15 @@ class JSONUtils {
     }
 
     public static Object readJsonFromUrl(URL url) throws IOException, ParseException {
-        URLConnection connection = url.openConnection();
-        InputStream in = connection.getInputStream();
+        InputStream in;
+
+        if(url.getProtocol().equals("file")){
+            in = new FileInputStream(url.getFile());
+        }
+        else {
+            URLConnection connection = url.openConnection();
+            in = connection.getInputStream();
+        }
 
         return readJson(in);
     }

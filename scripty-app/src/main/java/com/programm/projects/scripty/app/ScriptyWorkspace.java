@@ -219,7 +219,7 @@ class ScriptyWorkspace implements SyWorkspace {
 
             ScriptyModuleConfig config;
             try {
-                config = _readModuleConfig(moduleName, moduleFileUrl);
+                config = readModuleConfig(moduleFileUrl);
             } catch (ParseException e) {
                 throw new IOException("Could not read Module [" + moduleName + "] from url: " + moduleFileUrl);
             }
@@ -356,7 +356,7 @@ class ScriptyWorkspace implements SyWorkspace {
 
             try {
                 String moduleConfigFilePath = _ensureUrlConcat(moduleDest, FILE_SY_MODULE);
-                SyModuleConfig config = _readModuleConfig(moduleName, moduleConfigFilePath);
+                SyModuleConfig config = readModuleConfig(moduleConfigFilePath);
 
                 String moduleEntryFile = config.moduleEntry();
 
@@ -372,6 +372,8 @@ class ScriptyWorkspace implements SyWorkspace {
             catch (ParseException e){
                 io.err().println("Could not read Module [" + moduleName + "]: " + e.getMessage());
             }
+
+            i++;
         }
 
         modulesManager.loadModules(urls, entryPoints, moduleConfigs);
@@ -388,7 +390,7 @@ class ScriptyWorkspace implements SyWorkspace {
 
         try {
             String moduleConfigFilePath = _ensureUrlConcat(moduleDest, FILE_SY_MODULE);
-            SyModuleConfig config = _readModuleConfig(moduleName, moduleConfigFilePath);
+            SyModuleConfig config = readModuleConfig(moduleConfigFilePath);
 
             String rootFolder = config.rootFolder();
             String moduleEntryFile = config.moduleEntry();
@@ -419,15 +421,23 @@ class ScriptyWorkspace implements SyWorkspace {
         }
     }
 
-    private ScriptyModuleConfig _readModuleConfig(String name, String path) throws IOException, ParseException{
+    public ScriptyModuleConfig readModuleConfig(String path) throws IOException, ParseException{
         URL url = _tryCleanOrFileURL(path);
         Object oModuleObject = JSONUtils.readJsonFromUrl(url);
 
         if(!(oModuleObject instanceof JSONObject)){
-            throw new IOException("Module [" + name + "] is corrupted. It should be an JSONObject.");
+            throw new IOException("Module at [" + path + "] is corrupted. It should be an JSONObject.");
         }
 
         JSONObject moduleFileObject = (JSONObject) oModuleObject;
+
+        Object oName = moduleFileObject.get("name");
+
+        if(oName == null){
+            throw new IOException("Module at [" + path + "] is corrupted. It should specify a [name]");
+        }
+
+        String name = oName.toString();
 
         Object oVersion = moduleFileObject.get("version");
         String version = null;
@@ -510,6 +520,72 @@ class ScriptyWorkspace implements SyWorkspace {
 
 
 
+
+
+    @SuppressWarnings("unchecked")
+    private void writeToRepositoryFile(List<String> repositoryUrls) throws IOException{
+        JSONArray repositories = new JSONArray();
+        repositories.addAll(repositoryUrls);
+
+        try (Writer writer = new FileWriter(reposFile)){
+            repositories.writeJSONString(writer);
+        }
+    }
+
+    public void addRepository(String repositoryUrl) throws IOException {
+        List<String> repositories = listRepositories();
+
+        if(repositories.contains(repositoryUrl)){
+            throw new IOException("Repository [" + repositoryUrl + "] is already added!");
+        }
+
+        repositories.add(repositoryUrl);
+        writeToRepositoryFile(repositories);
+    }
+
+    public void removeRepository(String repositoryUrl) throws IOException {
+        List<String> repositories = listRepositories();
+
+        if(!repositories.contains(repositoryUrl)){
+            throw new IOException("Repository [" + repositoryUrl + "] does not exist!");
+        }
+
+        repositories.remove(repositoryUrl);
+        writeToRepositoryFile(repositories);
+    }
+
+    public List<String> listRepositories() throws IOException {
+        try {
+            Object oRepositories = JSONUtils.readJsonFromFile(reposFile);
+
+            if(!(oRepositories instanceof JSONArray)){
+                throw new IOException("Corrupted File: [" + ERR_REPOS + "]: ");
+            }
+
+            JSONArray repositories = (JSONArray) oRepositories;
+
+            List<String> repositoryList = new ArrayList<>();
+
+            for(Object oRepo : repositories){
+                repositoryList.add(oRepo.toString());
+            }
+
+            return repositoryList;
+        }
+        catch (ParseException e){
+            throw new IOException("Corrupted File: [" + ERR_REPOS + "]: ", e);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
     // Add module to sy.modules file
 
     @SuppressWarnings("unchecked")
@@ -583,7 +659,7 @@ class ScriptyWorkspace implements SyWorkspace {
 
         try {
             String moduleConfigFilePath = _ensureUrlConcat(moduleDest, FILE_SY_MODULE);
-            config = _readModuleConfig(moduleName, moduleConfigFilePath);
+            config = readModuleConfig(moduleConfigFilePath);
 
         }
         catch (ParseException e){

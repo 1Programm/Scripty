@@ -21,6 +21,9 @@ public class Scripty {
 
         try {
             commandManager.registerCommand("help", new CmdHelp());
+            commandManager.registerCommand("repos-list", new CmdReposList());
+            commandManager.registerCommand("repos-add", new CmdReposAdd());
+            commandManager.registerCommand("repos-remove", new CmdReposRemove());
             commandManager.registerCommand("modules-add", new CmdModulesAdd());
             commandManager.registerCommand("modules-remove", new CmdModulesRemove());
             commandManager.registerCommand("modules-update", new CmdModulesUpdate());

@@ -31,6 +31,12 @@ class CmdModulesList implements SySysCommand {
         io.out().println("# Modules:");
         for(String moduleName : modules.keySet()){
             SyModuleConfig config = context.modulesManager.getConfig(moduleName);
+
+            if(config == null){
+                io.err().println("Searching for module [" + moduleName + "] but no config could be found under same name. Reason could be an inconsistent naming (The name of the module in its config file and the name of the module in the repo file could differ!)");
+                continue;
+            }
+
             io.out().println("| " + moduleName + " - " + config.version() + " - " + modules.get(moduleName));
         }
     }

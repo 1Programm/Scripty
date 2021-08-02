@@ -6,14 +6,14 @@ import java.util.List;
 
 public class ScriptyModuleConfig implements SyModuleConfig {
 
-    private final String name;
-    private final String version;
-    private final List<String> authors;
+    String name;
+    String version;
+    List<String> authors;
 
     String rootFolder;
-    private final String rootPackage;
-    private final List<String> files;
-    private final String moduleEntry;
+    String rootPackage;
+    final List<String> files;
+    String moduleEntry;
 
     public ScriptyModuleConfig(String name, String version, List<String> authors, String rootFolder, String rootPackage, List<String> files, String moduleEntry) {
         this.name = name;

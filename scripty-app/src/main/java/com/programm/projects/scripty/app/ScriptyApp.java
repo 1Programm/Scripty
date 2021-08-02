@@ -2,6 +2,9 @@ package com.programm.projects.scripty.app;
 
 import com.programm.projects.scripty.core.Args;
 
+import java.io.File;
+import java.net.URL;
+
 public class ScriptyApp {
 
     /*
