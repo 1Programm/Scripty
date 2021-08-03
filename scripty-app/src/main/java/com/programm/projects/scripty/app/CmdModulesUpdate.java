@@ -44,8 +44,13 @@ class CmdModulesUpdate implements SySysCommand {
     }
 
     @Override
-    public void printHelp(IOutput out) {
-        //TODO
-        out.println("TODO");
+    public void printHelp(IOutput out, String commandName) {
+        out.println("--- Command [" + commandName + "] ---");
+        out.println("A command to update all or a specific module.");
+        out.newLine();
+
+        out.println("# Usage:");
+        out.println("|");
+        out.println("| " + commandName + " ([name]) -> Updates a module specified by [name]. If no name is specified it will update all installed modules.");
     }
 }

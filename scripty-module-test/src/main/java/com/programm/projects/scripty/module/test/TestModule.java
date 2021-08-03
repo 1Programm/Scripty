@@ -23,8 +23,8 @@ public class TestModule extends Module {
 
     @Override
     public void init(SyContext context, SyModuleConfig moduleConfig) {
-        out().println("Hello :D");
-        out().println("At your service.");
+        log().println("Hello :D");
+        log().println("At your service.");
     }
 
     public void math_calc(SyContext ctx, SyIO io, String name, Args args) throws CommandExecutionException {

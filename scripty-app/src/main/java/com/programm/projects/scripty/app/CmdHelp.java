@@ -9,7 +9,7 @@ public class CmdHelp implements SySysCommand {
     @Override
     public void run(SyContext ctx, SyIO io, String name, Args args) throws CommandExecutionException {
         if(args.size() == 0){
-            printHelp(io.out());
+            printHelp(io.out(), name);
             return;
         }
 
@@ -34,15 +34,17 @@ public class CmdHelp implements SySysCommand {
             throw new CommandExecutionException("Command [" + commandName + "] does not provide help.");
         }
 
-        info.printHelp(io.out());
+        info.printHelp(io.out(), commandName);
     }
 
     @Override
-    public void printHelp(IOutput out) {
+    public void printHelp(IOutput out, String commandName) {
         out.println("--- Scripty Help ---");
+        out.println("Welcome to scripty ;D");
+        out.println("To list all available commands use the command [commands-list]!");
         out.newLine();
 
-        out.println("# Usage:");
+        out.println("# Help usage:");
         out.println("|");
         out.println("| help           -> Prints this help page.");
         out.println("| help [command] -> Prints info about a specific command if that command provides help.");

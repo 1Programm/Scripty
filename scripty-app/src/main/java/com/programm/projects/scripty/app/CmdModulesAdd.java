@@ -58,8 +58,13 @@ class CmdModulesAdd implements SySysCommand {
     }
 
     @Override
-    public void printHelp(IOutput out) {
-        //TODO
-        out.println("TODO");
+    public void printHelp(IOutput out, String commandName) {
+        out.println("--- Command [" + commandName + "] ---");
+        out.println("A command to add and download a module specified by a name which will be looked up in the specified repos.");
+        out.newLine();
+
+        out.println("# Usage:");
+        out.println("|");
+        out.println("| " + commandName + " [name] ([dest])  -> Searches in [sy-repositories] for the module [name] and addes the module at the [dest] - path. (If no [dest] is specified it will install the module at [scripty-home]/modules/[name]/)");
     }
 }

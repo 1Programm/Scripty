@@ -42,9 +42,14 @@ class CmdModulesList implements SySysCommand {
     }
 
     @Override
-    public void printHelp(IOutput out) {
-        //TODO
-        out.println("TODO");
+    public void printHelp(IOutput out, String commandName) {
+        out.println("--- Command [" + commandName + "] ---");
+        out.println("A command to list all installed modules.");
+        out.newLine();
+
+        out.println("# Usage:");
+        out.println("|");
+        out.println("| " + commandName + "  -> Lists all installed modules.");
     }
 
 }

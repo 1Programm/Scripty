@@ -1,6 +1,6 @@
 {
   "name": "test-module",
-  "version": "1.1-SNAPSHOT",
+  "version": "1.1",
   "authors": ["Programm"],
 
   "root-folder": "module",

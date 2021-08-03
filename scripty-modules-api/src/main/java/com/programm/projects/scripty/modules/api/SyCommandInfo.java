@@ -6,6 +6,6 @@ public interface SyCommandInfo {
 
     String type();
 
-    void printHelp(IOutput out);
+    void printHelp(IOutput out, String commandName);
 
 }

@@ -28,9 +28,14 @@ class CmdModulesRemove implements SySysCommand {
     }
 
     @Override
-    public void printHelp(IOutput out) {
-        //TODO
-        out.println("TODO");
+    public void printHelp(IOutput out, String commandName) {
+        out.println("--- Command [" + commandName + "] ---");
+        out.println("A command to remove an installed module.");
+        out.newLine();
+
+        out.println("# Usage:");
+        out.println("|");
+        out.println("| " + commandName + " [name]   -> Removes the module [name].");
     }
 
 }

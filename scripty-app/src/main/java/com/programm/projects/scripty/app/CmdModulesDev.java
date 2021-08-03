@@ -655,7 +655,13 @@ public class CmdModulesDev implements SySysCommand {
     }
 
     @Override
-    public void printHelp(IOutput out) {
+    public void printHelp(IOutput out, String commandName) {
+        out.println("--- Command [" + commandName + "] ---");
+        out.println("A command to manage custom modules.");
+        out.newLine();
 
+        out.println("# Usage:");
+        out.println("|");
+        out.println("| " + commandName + "  -> A command to manage the development of a custom module. It will start an interactive conversation to help you set up a module or to update it.");
     }
 }

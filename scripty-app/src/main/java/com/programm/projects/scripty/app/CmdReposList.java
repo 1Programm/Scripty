@@ -34,8 +34,13 @@ public class CmdReposList implements SySysCommand {
     }
 
     @Override
-    public void printHelp(IOutput out) {
-        out.println("TODO");
-        //TODO: help for repos-list
+    public void printHelp(IOutput out, String commandName) {
+        out.println("--- Command [" + commandName + "] ---");
+        out.println("A command to list all specified repositories.");
+        out.newLine();
+
+        out.println("# Usage:");
+        out.println("|");
+        out.println("| " + commandName + "  -> Lists all specified repositories under which new modules will be discovered.");
     }
 }

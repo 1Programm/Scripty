@@ -12,6 +12,6 @@ interface SySysCommand extends SyCommand, SyCommandInfo {
 
     @Override
     default String type() {
-        return "build-in";
+        return "built-in";
     }
 }

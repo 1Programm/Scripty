@@ -31,8 +31,13 @@ public class CmdReposRemove implements SySysCommand {
     }
 
     @Override
-    public void printHelp(IOutput out) {
-        out.println("TODO");
-        //TODO: help for repos-remove
+    public void printHelp(IOutput out, String commandName) {
+        out.println("--- Command [" + commandName + "] ---");
+        out.println("A command to remove a repository url from your local repositories.");
+        out.newLine();
+
+        out.println("# Usage:");
+        out.println("|");
+        out.println("| " + commandName + " [url]    -> Removes a specific repository [url] from discovery.");
     }
 }

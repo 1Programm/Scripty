@@ -7,7 +7,6 @@ import com.programm.projects.scripty.modules.api.SyContext;
 import com.programm.projects.scripty.modules.api.SyIO;
 
 import java.io.IOException;
-import java.util.List;
 
 public class CmdReposAdd implements SySysCommand {
 
@@ -32,8 +31,13 @@ public class CmdReposAdd implements SySysCommand {
     }
 
     @Override
-    public void printHelp(IOutput out) {
-        out.println("TODO");
-        //TODO: help for repos-add
+    public void printHelp(IOutput out, String commandName) {
+        out.println("--- Command [" + commandName + "] ---");
+        out.println("A command to add a repository url to local repositories.");
+        out.newLine();
+
+        out.println("# Usage:");
+        out.println("|");
+        out.println("| " + commandName + " [url]    -> Add a new repository for discovery from [url].");
     }
 }
