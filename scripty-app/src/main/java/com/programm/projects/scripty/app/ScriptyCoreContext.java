@@ -48,7 +48,7 @@ class ScriptyCoreContext implements SyContext {
         command = commandManager.commandMap.get(commandName);
 
         if(command == null){
-            io.err().println("No such command: [" + command + "].");
+            io.err().println("No such command: [" + commandName + "].");
             return;
         }
 
