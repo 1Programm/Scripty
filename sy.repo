@@ -3,8 +3,8 @@
   "description": "Basic global repository to distribute scripty modules.",
   "modules": [
     {
-      "name": "test-module",
-      "url": "https://raw.githubusercontent.com/1Programm/Scripty/master/scripty-module-test"
+      "name": "hello-world",
+      "url": "https://raw.githubusercontent.com/1Programm/Scripty/master/scripty-module-helloworld"
     }
   ]
 }

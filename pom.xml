@@ -12,7 +12,7 @@
     <modules>
         <module>scripty-app</module>
         <module>scripty-modules-api</module>
-        <module>scripty-module-test</module>
+        <module>scripty-module-helloworld</module>
         <module>scripty-core</module>
     </modules>
 
