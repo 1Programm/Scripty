@@ -51,6 +51,7 @@ class CmdModulesUpdate implements SySysCommand {
 
         out.println("# Usage:");
         out.println("|");
-        out.println("| " + commandName + " ([name]) -> Updates a module specified by [name]. If no name is specified it will update all installed modules.");
+        out.println("| " + commandName + "        -> Updates all installed modules.");
+        out.println("| " + commandName + " [name] -> Updates a module specified by [name].");
     }
 }

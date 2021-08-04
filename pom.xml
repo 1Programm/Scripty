@@ -10,10 +10,11 @@
     <version>1.0-SNAPSHOT</version>
 
     <modules>
+        <module>scripty-core</module>
         <module>scripty-app</module>
         <module>scripty-modules-api</module>
         <module>scripty-module-helloworld</module>
-        <module>scripty-core</module>
+        <module>scripty-module-tutorials</module>
     </modules>
 
     <properties>

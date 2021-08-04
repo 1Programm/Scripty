@@ -31,7 +31,9 @@ class CmdModulesAdd implements SySysCommand {
         }
 
         try {
-            context.workspace.addModule(moduleName, moduleDest, false);
+            boolean success = context.workspace.addModule(moduleName, moduleDest, false);
+            if(!success) return;
+
             Module module = context.workspace.loadSingleModule(context.modulesManager, moduleName);
 
             ScriptyCommandManager commandManager = new ScriptyCommandManager();

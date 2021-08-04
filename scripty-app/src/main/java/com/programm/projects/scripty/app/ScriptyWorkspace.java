@@ -589,12 +589,12 @@ class ScriptyWorkspace implements SyWorkspace {
     // Add module to sy.modules file
 
     @SuppressWarnings("unchecked")
-    public void addModule(String name, String destination, boolean silent) throws IOException{
+    public boolean addModule(String name, String destination, boolean silent) throws IOException{
         String url = _lookupModuleName(name);
 
         if(url == null){
             io.err().println("Could not find a Module with name [" + name + "] in the specified repositories.");
-            return;
+            return false;
         }
 
         io.log().println("Adding Module [" + name + "] to workspace at [" + destination + "] ...");
@@ -603,7 +603,7 @@ class ScriptyWorkspace implements SyWorkspace {
 
             if(modulesObject.containsKey(name)){
                 (silent ? io.log() : io.out()).println("Module [" + name + "] already exists.");
-                return;
+                return false;
             }
 
             modulesObject.put(name, destination);
@@ -619,6 +619,7 @@ class ScriptyWorkspace implements SyWorkspace {
         }
 
         (silent ? io.log() : io.out()).println("Added Module [" + name + "] at [" + destination + "].");
+        return true;
     }
 
     public void removeModule(String name) throws IOException{

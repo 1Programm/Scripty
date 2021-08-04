@@ -15,6 +15,7 @@ class CmdCommandsList implements SySysCommand {
 
         String type = null;
         String pattern = null;
+        boolean filterBuiltins = false;
 
         for(int i=0;i<args.size();i++){
             if(args.get(i).startsWith("-")) {
@@ -25,6 +26,9 @@ class CmdCommandsList implements SySysCommand {
 
                     type = args.get(i + 1);
                     i++;
+                }
+                else if(args.get(i).equals("-c") || args.get(i).equals("--custom")){
+                    filterBuiltins = true;
                 }
                 else {
                     throw new CommandExecutionException("Invalid optional '" + args.get(i) + "'. Try 'help " + commandName + "' for more help!");
@@ -46,9 +50,24 @@ class CmdCommandsList implements SySysCommand {
 
         List<String> commands = new ArrayList<>(context.commandManager.commandMap.keySet());
 
-        if(pattern != null || type != null){
+        if(filterBuiltins || pattern != null || type != null){
             for(int i=0;i<commands.size();i++){
                 String cmdName = commands.get(i);
+                SyCommand cmd = null;
+                SyCommandInfo info = null;
+
+                if(filterBuiltins){
+                    cmd = context.commandManager.commandMap.get(cmdName);
+                    info = cmd.info();
+
+                    if(info != null){
+                        String cmdType = info.type();
+                        if(cmdType.equals("built-in")){
+                            commands.remove(i);
+                            i--;
+                        }
+                    }
+                }
 
                 if(pattern != null) {
                     if (!cmdName.matches(pattern)) {
@@ -59,8 +78,10 @@ class CmdCommandsList implements SySysCommand {
                 }
 
                 if(type != null){
-                    SyCommand cmd = context.commandManager.commandMap.get(cmdName);
-                    SyCommandInfo info = cmd.info();
+                    if(cmd == null) {
+                        cmd = context.commandManager.commandMap.get(cmdName);
+                        info = cmd.info();
+                    }
 
                     if(info != null){
                         String cmdType = info.type();
@@ -119,6 +140,8 @@ class CmdCommandsList implements SySysCommand {
         out.println("|");
         out.println("| -t [type]        -> Filters out all commands which do not have the specified [type].");
         out.println("| --type [type]");
+        out.println("| -c               -> Filters out all 'built-in' commands.");
+        out.println("| --custom");
 
     }
 }

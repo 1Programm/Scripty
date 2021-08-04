@@ -5,6 +5,10 @@
     {
       "name": "hello-world",
       "url": "https://raw.githubusercontent.com/1Programm/Scripty/master/scripty-module-helloworld"
+    },
+    {
+      "name": "tutorials",
+      "url": "https://raw.githubusercontent.com/1Programm/Scripty/master/scripty-module-tutorials"
     }
   ]
 }
