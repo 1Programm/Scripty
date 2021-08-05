@@ -132,13 +132,13 @@ class CmdCommandsList implements SySysCommand {
 
         out.println("# Usage:");
         out.println("|");
-        out.println("| commands-list (options)              -> Lists all commands with and their command-types.");
-        out.println("| commands-list (options) [pattern]    -> Lists all commands which match the specified [pattern].");
+        out.println("| commands-list (options)              -> Lists all commands and their command-types.");
+        out.println("| commands-list (options) [pattern]    -> Lists all commands which match the specified [pattern] - regex.");
         out.newLine();
 
         out.println("# Options:");
         out.println("|");
-        out.println("| -t [type]        -> Filters out all commands which do not have the specified [type].");
+        out.println("| -t [type]        -> Filters out all commands which do not match the specified [type] - regex.");
         out.println("| --type [type]");
         out.println("| -c               -> Filters out all 'built-in' commands.");
         out.println("| --custom");

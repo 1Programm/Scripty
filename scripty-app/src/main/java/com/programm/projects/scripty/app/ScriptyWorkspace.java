@@ -622,14 +622,14 @@ class ScriptyWorkspace implements SyWorkspace {
         return true;
     }
 
-    public void removeModule(String name) throws IOException{
+    public boolean removeModule(String name) throws IOException{
         io.log().println("Removing Module [" + name + "] ...");
         try {
             JSONObject modulesObject = (JSONObject) JSONUtils.readJsonFromFile(modulesFile);
 
             if(!modulesObject.containsKey(name)){
                 io.out().println("No such module [" + name + "] installed.");
-                return;
+                return false;
             }
 
             String destination = modulesObject.remove(name).toString();
@@ -639,13 +639,16 @@ class ScriptyWorkspace implements SyWorkspace {
             io.log().println("Updated [" + ERR_MODULES + "].");
 
 
-            removeModuleFiles(destination);
+            if(!removeModuleFiles(destination)){
+                return false;
+            }
         }
         catch (ParseException e){
             throw new IOException("Corrupted File: [" + ERR_MODULES + "]: ", e);
         }
 
         io.log().println("Removed Module [" + name + "].");
+        return true;
     }
 
     public void updateModule(String moduleName) throws IOException {
@@ -739,7 +742,7 @@ class ScriptyWorkspace implements SyWorkspace {
 
 
 
-    private void removeModuleFiles(String destination){
+    private boolean removeModuleFiles(String destination){
         File destFolder = new File(destination);
         if(destFolder.exists()){
             try {
@@ -747,12 +750,16 @@ class ScriptyWorkspace implements SyWorkspace {
 
                 if(!destFolder.delete()){
                     io.err().println("Could not delete unfinished installed moduel at: " + destination);
+                    return false;
                 }
             }
             catch (IOException e){
                 io.err().println(e.getMessage());
+                return false;
             }
         }
+
+        return true;
     }
 
     private void recRemoveFile(File file) throws IOException{

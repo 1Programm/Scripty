@@ -20,7 +20,11 @@ class CmdModulesRemove implements SySysCommand {
         }
 
         try {
-            ((ScriptyWorkspace) ctx.workspace()).removeModule(moduleName);
+            boolean success = ((ScriptyWorkspace) ctx.workspace()).removeModule(moduleName);
+
+            if(success){
+                io.out().println("[" + moduleName + "] has been removed.");
+            }
         }
         catch (IOException e){
             throw new CommandExecutionException("Could not remove module [" + moduleName + "]: " + e.getMessage());
