@@ -39,6 +39,10 @@ class ScriptyCoreContext implements SyContext {
 
         //Run possible system command without initializing modules.
         if(sysCommand != null){
+            if(sysCommand instanceof CmdInfo){
+                modulesManager.initModules(this, moduleIO);
+            }
+
             sysCommand.run(this, io, commandName, args);
             return;
         }

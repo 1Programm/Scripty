@@ -17,9 +17,9 @@ class ScriptyModulesManager {
 
     private final SyIO io;
 
-    private final List<Module> modules = new ArrayList<>();
-    private final Map<Module, SyModuleConfig> moduleConfigs = new HashMap<>();
-    private final Map<String, Module> moduleMap = new HashMap<>();
+    final List<Module> modules = new ArrayList<>();
+    final Map<Module, SyModuleConfig> moduleConfigs = new HashMap<>();
+    final Map<String, Module> moduleMap = new HashMap<>();
 
     public ScriptyModulesManager(SyIO io) {
         this.io = io;

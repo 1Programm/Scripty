@@ -27,9 +27,12 @@ class ScriptyWorkspace implements SyWorkspace {
     private static final String FILE_SY_REPOS = "sy.repos";
     private static final String FILE_SY_MODULES = "sy.modules";
     private static final String FILE_SY_MODULE = "sy.module";
+    private static final String FILE_SY_VERSION = "version";
     private static final String CONTENT_DEFAULT_REPO = "https://raw.githubusercontent.com/1Programm/Scripty/master/sy.repo";
 
     private final SyIO io;
+
+    private String scriptyVersion;
 
     private File workspaceFolder;
     private String userPath;
@@ -38,7 +41,7 @@ class ScriptyWorkspace implements SyWorkspace {
     private File reposFile;
     private File modulesFile;
 
-    private final List<String> repositoryUrls = new ArrayList<>();
+    final List<String> repositoryUrls = new ArrayList<>();
 
     public ScriptyWorkspace(SyIO io) {
         this.io = io;
@@ -47,9 +50,19 @@ class ScriptyWorkspace implements SyWorkspace {
     // Setting up the Workspace
     // > This should load, create and check the [workspace-folder, sy.repos-file, sy.modules-file] if they exist
 
-    public void setupWorkspace(String workspace, String userPath) throws IOException {
+    public void setupWorkspace(String installationPath, String workspace, String userPath) throws IOException {
         workspaceFolder = FileUtils.getCreateDir(workspace, ERR_WORKSPACE);
         this.userPath = userPath;
+
+        File versionFile = new File(installationPath, FILE_SY_VERSION);
+
+        if(!versionFile.exists()){
+            throw new IOException("Corrupted scripty setup. No versionn file found at: [" + versionFile.getAbsolutePath() + "]!");
+        }
+
+        try(BufferedReader reader = new BufferedReader(new FileReader(versionFile))){
+            scriptyVersion = reader.readLine().trim();
+        }
 
         reposFile = new File(workspaceFolder, FILE_SY_REPOS);
         if(!reposFile.exists()){
@@ -159,18 +172,21 @@ class ScriptyWorkspace implements SyWorkspace {
         _copyModuleFromUrl(name, moduleUrl, destination, false);
     }
 
-    private String _lookupModuleName(String name) throws IOException {
-        for(String repoUrl : repositoryUrls) {
-            String repoName = repoUrl;
+    Map<String, Map<String, String>> _collectRepoModulesMap() throws IOException {
+        Map<String, Map<String, String>> repoModulesMap = new HashMap<>();
 
+        for(String repoUrl : repositoryUrls) {
             try {
                 JSONObject oRepo = (JSONObject) JSONUtils.readJsonFromUrl(repoUrl);
-                repoName = oRepo.get("name").toString() + " (" + repoUrl + ")";
+                String repoName = oRepo.get("name").toString();
+
+                Map<String, String> modulesMap = new HashMap<>();
+                repoModulesMap.put(repoName, modulesMap);
 
                 Object oModulesArray = oRepo.get("modules");
 
                 if(!(oModulesArray instanceof JSONArray)){
-                    io.err().println("Corrupted Repo File: [" + repoName + "]. Modules should be specified in an array!");
+                    io.err().println("Corrupted Repo File: [" + repoName + "(" + repoUrl + ")]. Modules should be specified in an array!");
                     continue;
                 }
 
@@ -178,7 +194,7 @@ class ScriptyWorkspace implements SyWorkspace {
 
                 for (Object oModule : modulesArray) {
                     if (!(oModule instanceof JSONObject)) {
-                        io.err().println("Corrupted Module in repo: [" + repoName + "]: A Module should be specified in as an JSON Object!");
+                        io.err().println("Corrupted Module in repo: [" + repoName + "(" + repoUrl + ")]: A Module should be specified in as an JSON Object!");
                         continue;
                     }
 
@@ -186,7 +202,7 @@ class ScriptyWorkspace implements SyWorkspace {
 
                     Object oModuleName = module.get("name");
                     if (oModuleName == null) {
-                        io.err().println("Corrupted Module in repo: [" + repoName + "]: No name defined!");
+                        io.err().println("Corrupted Module in repo: [" + repoName + "(" + repoUrl + ")]: No name defined!");
                         continue;
                     }
 
@@ -194,19 +210,37 @@ class ScriptyWorkspace implements SyWorkspace {
 
                     Object oModuleUrl = module.get("url");
                     if (oModuleUrl == null) {
-                        io.err().println("Corrupted Module [" + moduleName + "] in repo: [" + repoName + "]: No url defined!");
+                        io.err().println("Corrupted Module [" + moduleName + "] in repo: [" + repoName + "(" + repoUrl + ")]: No url defined!");
                         continue;
                     }
 
                     String moduleUrl = oModuleUrl.toString();
 
-                    if (moduleName.equals(name)) {
-                        io.log().println("Found module [" + moduleName + "] in repository: [" + repoName + "].");
-                        return moduleUrl;
+                    if(repoModulesMap.containsKey(moduleName)){
+                        io.log().println("Multiple modules found with the same name [" + moduleName + "]!");
+                    }
+                    else {
+                        modulesMap.put(moduleName, moduleUrl);
                     }
                 }
             } catch (ParseException e) {
-                throw new IOException("Could not read [" + repoName + "].", e);
+                throw new IOException("Could not read repo at: (" + repoUrl + ").");
+            }
+        }
+
+        return repoModulesMap;
+    }
+
+    private String _lookupModuleName(String name) throws IOException {
+        Map<String, Map<String, String>> repoModulesMap = _collectRepoModulesMap();
+
+        for(String repoName : repoModulesMap.keySet()){
+            Map<String, String> modulesMap = repoModulesMap.get(repoName);
+            for(String moduleName : modulesMap.keySet()) {
+                if (moduleName.equals(name)) {
+                    io.log().println("Found module [" + moduleName + "] in repo: [" + repoName + "]");
+                    return modulesMap.get(moduleName);
+                }
             }
         }
 
@@ -802,7 +836,10 @@ class ScriptyWorkspace implements SyWorkspace {
     }
 
 
-
+    @Override
+    public String scriptyVersion() {
+        return scriptyVersion;
+    }
 
     @Override
     public String workspacePath(){

@@ -2,9 +2,6 @@ package com.programm.projects.scripty.app;
 
 import com.programm.projects.scripty.core.Args;
 
-import java.io.File;
-import java.net.URL;
-
 public class ScriptyApp {
 
     /*
@@ -20,12 +17,13 @@ public class ScriptyApp {
 
     public static void main(String[] _args) {
         Args args = new Args(_args);
-        String workspace = args.get(0);
-        String userPath = args.get(1);
-        args = args.sub(2);
+        String installationPath = args.get(0);
+        String workspace = args.get(1);
+        String userPath = args.get(2);
+        args = args.sub(3);
 
         Scripty scripty = new Scripty();
-        scripty.init(workspace, userPath);
+        scripty.init(installationPath, workspace, userPath);
         scripty.run(args);
     }
 

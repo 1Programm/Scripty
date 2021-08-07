@@ -185,6 +185,7 @@ runCommands "$@"
 
 # No 'outer' command -> execute java scripty engine
 
+INSTALLATION_PATH="/usr/local/bin/sy.d"
 WORKSPACE_PATH="$HOME/.scripty"
 USER_PATH="$(pwd)"
-java -jar /usr/local/bin/sy.d/scripty.jar "$WORKSPACE_PATH" "$USER_PATH" "$@"
+java -jar /usr/local/bin/sy.d/scripty.jar "$INSTALLATION_PATH" "$WORKSPACE_PATH" "$USER_PATH" "$@"

@@ -21,6 +21,7 @@ public class Scripty {
 
         try {
             commandManager.registerCommand("help", new CmdHelp());
+            commandManager.registerCommand("info", new CmdInfo());
             commandManager.registerCommand("repos-list", new CmdReposList());
             commandManager.registerCommand("repos-add", new CmdReposAdd());
             commandManager.registerCommand("repos-remove", new CmdReposRemove());
@@ -36,9 +37,9 @@ public class Scripty {
         }
     }
 
-    public void init(String workspacePath, String userPath){
+    public void init(String installationPath, String workspacePath, String userPath){
         try {
-            workspace.setupWorkspace(workspacePath, userPath);
+            workspace.setupWorkspace(installationPath, workspacePath, userPath);
         }
         catch (Exception e){
             io.err().println("Error while initializing workspace: " + e.getMessage());
