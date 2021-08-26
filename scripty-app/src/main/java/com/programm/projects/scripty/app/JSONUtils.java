@@ -10,6 +10,17 @@ import java.net.URLConnection;
 class JSONUtils {
 
     public static Object readJsonFromUrl(String url) throws IOException, ParseException {
+        int firstDP = url.indexOf(':');
+
+        if(firstDP == -1){
+            int from = 0;
+            while(url.charAt(from) == '/'){
+                from++;
+            }
+
+            url = "file:/" + url.substring(from);
+        }
+
         return readJsonFromUrl(new URL(url));
     }
 
