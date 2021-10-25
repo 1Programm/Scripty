@@ -1,4 +1,4 @@
-package com.programm.projects.scripty.app;
+package com.programm.projects.scripty.app.modules;
 
 public class SyModuleBuildException extends Exception {
 

@@ -1,4 +1,4 @@
-package com.programm.projects.scripty.app;
+package com.programm.projects.scripty.app.modules;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

@@ -1,14 +1,6 @@
-{
-  "name": "Base Repository",
-  "description": "Basic global repository to distribute scripty modules.",
-  "modules": [
-    {
-      "name": "hello-world",
-      "url": "https://raw.githubusercontent.com/1Programm/Scripty/master/scripty-module-helloworld"
-    },
-    {
-      "name": "tutorials",
-      "url": "https://raw.githubusercontent.com/1Programm/Scripty/master/scripty-module-tutorials"
-    }
-  ]
-}
+name=Base Repository
+description=Basic global repository to distribute scripty modules.
+modules.module0.name=hello-world
+modules.module0.url=https://raw.githubusercontent.com/1Programm/Scripty/master/scripty-module-helloworld
+modules.module1.name=tutorials
+modules.module1.url=https://raw.githubusercontent.com/1Programm/Scripty/master/scripty-module-tutorials

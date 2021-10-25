@@ -1,4 +1,4 @@
-package com.programm.projects.scripty.app;
+package com.programm.projects.scripty.app.modules;
 
 import com.programm.projects.scripty.module.api.SyModule;
 

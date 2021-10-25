@@ -17,4 +17,12 @@
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.programm.projects</groupId>
+            <artifactId>ioutils-log-console</artifactId>
+            <version>1.0</version>
+        </dependency>
+    </dependencies>
+
 </project>
