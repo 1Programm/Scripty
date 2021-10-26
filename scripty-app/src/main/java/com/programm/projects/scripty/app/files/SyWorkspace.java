@@ -1,6 +1,7 @@
 package com.programm.projects.scripty.app.files;
 
-import com.programm.projects.scripty.module.api.SyContext;
+import com.programm.projects.scripty.module.api.IContext;
+import com.programm.projects.scripty.module.api.IWorkspace;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,7 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-public class SyWorkspace {
+public class SyWorkspace implements IWorkspace {
 
     private final String workspacePath;
 
@@ -19,7 +20,7 @@ public class SyWorkspace {
         this.workspacePath = workspacePath;
     }
 
-    public boolean loadWorkspace(SyContext ctx){
+    public boolean loadWorkspace(IContext ctx){
         File workspaceFolder = new File(workspacePath);
 
         if(!workspaceFolder.exists()){
@@ -112,7 +113,7 @@ public class SyWorkspace {
         return true;
     }
 
-    public void deleteWorkspace(SyContext ctx){
+    public void deleteWorkspace(IContext ctx){
         ctx.log().println("Deleting Workspace ...");
 
         File file = new File(workspacePath);

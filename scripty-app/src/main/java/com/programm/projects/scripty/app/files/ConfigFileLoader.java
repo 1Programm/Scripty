@@ -6,7 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-class ConfigFileLoader {
+public class ConfigFileLoader {
 
     private static List<String> readStringList(Properties properties, String key){
         List<String> list = new ArrayList<>();

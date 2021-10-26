@@ -1,19 +1,17 @@
 package com.programm.projects.scripty.app.modules;
 
-import com.programm.projects.scripty.module.api.SyModule;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class ModulesHandler {
 
-    private final List<SyModule> modules = new ArrayList<>();
+    private final List<IModule> modules = new ArrayList<>();
 
-    public void add(SyModule module){
+    public void add(IModule module){
         modules.add(module);
     }
 
-    public void remove(SyModule module){
+    public void remove(IModule module){
         modules.remove(module);
     }
 

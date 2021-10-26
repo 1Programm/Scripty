@@ -1,12 +1,18 @@
 package com.programm.projects.scripty.app.modules;
 
-import com.programm.projects.scripty.module.api.SyContext;
-import com.programm.projects.scripty.module.api.SyModule;
+import com.programm.projects.scripty.app.Scripty;
+import com.programm.projects.scripty.app.files.ConfigFileLoader;
+import com.programm.projects.scripty.app.files.ModuleConfigFile;
+import com.programm.projects.scripty.app.utils.ClassHelper;
+import com.programm.projects.scripty.module.api.IContext;
 import com.programm.projects.scripty.module.api.events.Get;
-import com.programm.projects.scripty.module.api.events.OnMessage;
 import com.programm.projects.scripty.module.api.events.PostSetup;
 import com.programm.projects.scripty.module.api.events.PreSetup;
+import com.sun.security.auth.login.ConfigFile;
+import lombok.RequiredArgsConstructor;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,17 +20,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+@RequiredArgsConstructor
 public class ModuleBuilder {
 
-    public static void setupModule(SyModule module, SyContext ctx){
+    private final Function<Class<?>, Object> getMap;
+
+    public static ExecutableModule buildModule(File moduleFolder) throws SyModuleBuildException {
+        File moduleConfigFile = new File(moduleFolder, Scripty.FILE_MODULE);
+
+        if(!moduleConfigFile.exists()) throw new SyModuleBuildException("Invalid Module! No [sy.module] file found inside: " + moduleFolder.getAbsolutePath());
+
+        ModuleConfigFile moduleConfig;
+        try {
+            moduleConfig = ConfigFileLoader.moduleConfigFileLoader(moduleConfigFile);
+        } catch (IOException e) {
+            throw new SyModuleBuildException("Could not load module config file!", e);
+        }
+
+
 
     }
 
     public static ExecutableModule buildModule(Class<?> cls, Function<Class<?>, Object> getMap) throws SyModuleBuildException {
-        if(!SyModule.class.isAssignableFrom(cls)) {
-            throw new SyModuleBuildException("Cannot build a module out of non - module class [" + cls.getName() + "]!");
-        }
-
         Object instance = createInstanceFromEmptyConstructor(cls);
 
 
@@ -62,12 +79,9 @@ public class ModuleBuilder {
             else if(method.isAnnotationPresent(PostSetup.class)){
                 postSetupMethods.add(buildMethodRunner(cls, method, instance, getMap));
             }
-            else if(method.isAnnotationPresent(OnMessage.class)){
-                onMessageMethods.add(new MethodRunner(method, instance, null));
-            }
         }
 
-        return new ExecutableModule((SyModule) instance, preSetupMethods, postSetupMethods, onMessageMethods);
+        return new ExecutableModule((IModule) instance, preSetupMethods, postSetupMethods, onMessageMethods);
     }
 
     private static MethodRunner buildMethodRunner(Class<?> cls, Method method, Object instance, Function<Class<?>, Object> getMap) throws SyModuleBuildException{

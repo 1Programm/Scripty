@@ -1,26 +1,23 @@
 package com.programm.projects.scripty.app.modules;
 
-import com.programm.projects.scripty.module.api.SyContext;
-import com.programm.projects.scripty.module.api.SyModule;
+import com.programm.projects.scripty.module.api.IContext;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 public class ExecutableModule {
 
-    public final SyModule module;
+    public final Object module;
     public final List<MethodRunner> preSetupMethods;
     public final List<MethodRunner> postSetupMethods;
-    public final List<MethodRunner> onMessageMethods;
 
-    public ExecutableModule(SyModule module, List<MethodRunner> preSetupMethods, List<MethodRunner> postSetupMethods, List<MethodRunner> onMessageMethods) {
+    public ExecutableModule(Object module, List<MethodRunner> preSetupMethods, List<MethodRunner> postSetupMethods) {
         this.module = module;
         this.preSetupMethods = preSetupMethods;
         this.postSetupMethods = postSetupMethods;
-        this.onMessageMethods = onMessageMethods;
     }
 
-    public void preSetup(SyContext ctx){
+    public void preSetup(IContext ctx){
         for(MethodRunner runner : preSetupMethods){
             try {
                 runner.run();
@@ -31,11 +28,7 @@ public class ExecutableModule {
         }
     }
 
-    public void setup(SyContext ctx){
-        module.setup(ctx);
-    }
-
-    public void postSetup(SyContext ctx){
+    public void postSetup(IContext ctx){
         for(MethodRunner runner : postSetupMethods){
             try {
                 runner.run();

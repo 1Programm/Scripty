@@ -7,9 +7,15 @@ import com.programm.projects.ioutils.log.console.in.ScannerIn;
 import com.programm.projects.ioutils.log.console.out.*;
 import com.programm.projects.scripty.app.files.SyWorkspace;
 import com.programm.projects.scripty.app.modules.ModulesHandler;
-import com.programm.projects.scripty.module.api.SyContext;
+import com.programm.projects.scripty.module.api.IContext;
+import com.programm.projects.scripty.module.api.IWorkspace;
 
-public class Scripty implements SyContext {
+public class Scripty implements IContext {
+
+    public static final String FILE_REPOS = "sy.repos";
+    public static final String FILE_REPO = "sy.repo";
+    public static final String FILE_MODULES = "sy.modules";
+    public static final String FILE_MODULE = "sy.module";
 
     private static IFormattedOutput configuredOut(){
         return new ConsoleOut()
@@ -62,5 +68,10 @@ public class Scripty implements SyContext {
     @Override
     public IInput in() {
         return in;
+    }
+
+    @Override
+    public IWorkspace workspace() {
+        return workspace;
     }
 }

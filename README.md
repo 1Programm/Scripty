@@ -76,3 +76,35 @@ repos-list                  -> Lists all specified repositories under which new 
 repos-add [url]             -> Add a new repository for discovery from [url].
 repos-remove [url]          -> Removes a specific repository [url] from discovery.
 ```
+
+
+#### Modules
+A Module is basically just a package for commands.
+A module can be used to publish to a repository and be downloaded from there.
+
+#### Custom Module
+To create a custom Module one must use the dependency:
+<details>
+<summary>scripty-module-api</summary>
+<code>```html
+<dependency>
+    <groupId>com.programm.projects</groupId>
+    <artifactId>scripty-modules-api</artifactId>
+    <version>1.0-SNAPSHOT</version>
+</dependency>
+```
+</code>
+</details>
+
+dadwad
+a
+adwa
+dwa
+d
+da
+
+ad
+
+
+
+

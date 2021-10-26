@@ -1,12 +1,14 @@
-package com.programm.projects.scripty.module.api.events;
+package com.programm.projects.scripty.module.api.commands;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface OnMessage {
+@Target(ElementType.METHOD)
+public @interface CmdUse {
+
+    Class<? extends ICommand> value();
 
 }
