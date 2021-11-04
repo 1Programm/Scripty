@@ -1,6 +1,6 @@
 name=Base Repository
 description=Basic global repository to distribute scripty modules.
-modules.module0.name=hello-world
-modules.module0.url=https://raw.githubusercontent.com/1Programm/Scripty/master/scripty-module-helloworld
-modules.module1.name=tutorials
-modules.module1.url=https://raw.githubusercontent.com/1Programm/Scripty/master/scripty-module-tutorials
+module.name0=hello-world
+module.url0=https://raw.githubusercontent.com/1Programm/Scripty/master/scripty-module-helloworld
+module.name1=tutorials
+module.url1=https://raw.githubusercontent.com/1Programm/Scripty/master/scripty-module-tutorials
