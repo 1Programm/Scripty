@@ -16,9 +16,9 @@ import com.programm.projects.scripty.module.api.Command;
 import com.programm.projects.scripty.module.api.IContext;
 import com.programm.projects.scripty.module.api.IWorkspace;
 
-import java.io.File;
-import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
+import java.util.Map;
 
 public class Scripty implements IContext {
 
@@ -72,8 +72,10 @@ public class Scripty implements IContext {
     public Scripty(String workspacePath){
         this.workspace = new SyWorkspace(workspacePath);
         this.env = new MagicEnvironment("com.programm.projects.scripty");
-        this.env.addSearchAnnotation(Command.class);
         this.commandManager = new CommandManager();
+
+        this.env.addSearchAnnotation(Command.class);
+        this.env.registerInstance(IContext.class, this);
 
         if(DEBUG) Plugz.setLogger(new ConsoleOut());
     }
@@ -87,15 +89,15 @@ public class Scripty implements IContext {
             System.exit(1);
         }
 
-        env.registerInstance(IContext.class, this);
-        try {
-            env.addUrl(new File("/Users/julian/Desktop/Programming/Java/projects/scripty/scripty-module-helloworld/module").toURI().toURL(), "com.programm");
-        }
-        catch (MalformedURLException e){
-            e.printStackTrace();
+
+        Map<URL, String> moduleUrlWithBasePackagesMap = workspace.collectModuleUrls(this);
+        for(URL url : moduleUrlWithBasePackagesMap.keySet()){
+            String basePackage = moduleUrlWithBasePackagesMap.get(url);
+            env.addUrl(url, basePackage);
         }
 
         env.startup();
+
         List<Class<?>> commandClasses = env.getAnnotatedWith(Command.class);
 
         for(Class<?> cls : commandClasses){

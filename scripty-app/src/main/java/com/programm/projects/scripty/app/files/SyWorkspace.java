@@ -7,6 +7,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 public class SyWorkspace implements IWorkspace {
@@ -111,6 +116,42 @@ public class SyWorkspace implements IWorkspace {
 
 
         return true;
+    }
+
+    public Map<URL, String> collectModuleUrls(IContext ctx){
+        Map<URL, String> moduleUrls = new HashMap<>();
+        Map<String, String> nameToUrlMap = modulesConfigFile.getModuleNameToUrlMap();
+
+        for(String name : nameToUrlMap.keySet()){
+            String rootModulePath = nameToUrlMap.get(name);
+            File moduleFile = new File(rootModulePath, "sy.module");
+
+            ModuleConfigFile moduleConfigFile;
+
+            try {
+                moduleConfigFile = ConfigFileLoader.moduleConfigFileLoader(moduleFile);
+            } catch (IOException e) {
+                ctx.err().println("Could not read module file at: [" + moduleFile.getAbsolutePath() + "]!");
+                continue;
+            }
+
+            String rootFolder = moduleConfigFile.getRootFolder();
+
+            File rootFolderFile = new File(rootModulePath, rootFolder);
+            URL url;
+
+            try {
+                url = rootFolderFile.toURI().toURL();
+            } catch (MalformedURLException e) {
+                ctx.err().println("File [" + rootFolderFile.getAbsolutePath() + "] could not be parsed to a URL.");
+                continue;
+            }
+
+            String basePackage = moduleConfigFile.getBasePackage();
+            moduleUrls.put(url, basePackage);
+        }
+
+        return moduleUrls;
     }
 
     public void deleteWorkspace(IContext ctx){
