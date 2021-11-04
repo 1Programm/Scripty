@@ -10,6 +10,8 @@ public interface IContext {
     IOutput err();
     IInput in();
 
+    void run(String s);
+
     IWorkspace workspace();
 
 }

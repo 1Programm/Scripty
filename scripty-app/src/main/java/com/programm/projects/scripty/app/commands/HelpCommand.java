@@ -6,7 +6,9 @@ import com.programm.projects.scripty.module.api.Command;
 public class HelpCommand {
 
     @Command
-    public void run(String... args) {
+    public void run(String name, String input) {
+        System.out.println("Help:");
+        System.out.println("---> TODO");
     }
 
 }

@@ -9,7 +9,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Command {
 
-    //name
+    /**
+     * @return the name of the command annotated with this annotation
+     */
     String value() default "";
 
 }

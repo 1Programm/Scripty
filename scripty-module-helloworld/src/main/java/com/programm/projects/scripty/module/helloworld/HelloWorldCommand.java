@@ -1,15 +1,19 @@
 package com.programm.projects.scripty.module.helloworld;
 
+import com.programm.projects.plugz.magic.Get;
 import com.programm.projects.scripty.module.api.Command;
 import com.programm.projects.scripty.module.api.IContext;
-import com.programm.projects.scripty.module.api.events.Get;
 
 @Command
 public class HelloWorldCommand {
 
+    @Get
+    private IContext ctx;
+
     @Command
-    public void run(@Get IContext ctx, String... args){
+    public void run(String name, String input){
         ctx.out().println("Hello World!");
+        ctx.out().println("Input: " + input);
     }
 
 }

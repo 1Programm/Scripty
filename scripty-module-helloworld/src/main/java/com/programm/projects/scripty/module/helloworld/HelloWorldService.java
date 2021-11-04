@@ -1,11 +1,10 @@
 package com.programm.projects.scripty.module.helloworld;
 
+import com.programm.projects.plugz.magic.Get;
+import com.programm.projects.plugz.magic.PostSetup;
+import com.programm.projects.plugz.magic.PreSetup;
+import com.programm.projects.plugz.magic.Service;
 import com.programm.projects.scripty.module.api.IContext;
-import com.programm.projects.scripty.module.api.Service;
-import com.programm.projects.scripty.module.api.commands.ICommand;
-import com.programm.projects.scripty.module.api.events.Get;
-import com.programm.projects.scripty.module.api.events.PostSetup;
-import com.programm.projects.scripty.module.api.events.PreSetup;
 
 @Service
 public class HelloWorldService {
@@ -13,22 +12,15 @@ public class HelloWorldService {
     @Get
     private IContext ctx;
 
-    @Get("hello-world")
-    private ICommand hello;
-
-    @Get
-    private HelloWorldCommand cmd;
-
     @PreSetup
     public void preInit(){
-        ctx.log().println("Pre: {}", hello);
+        ctx.log().println("Pre Setup");
     }
 
     @PostSetup
     public void init(){
-        ctx.log().println("Post: {}", hello.name());
-        hello.run();
-        cmd.run(ctx);
+        ctx.log().println("Post Setup");
+        ctx.run("hello-world bla");
     }
 
 }
