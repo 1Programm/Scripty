@@ -13,7 +13,6 @@ public class HelloWorldCommand {
     @Command
     public void run(String name, String input){
         ctx.out().println("Hello World!");
-        ctx.out().println("Input: " + input);
     }
 
 }

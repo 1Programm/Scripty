@@ -36,9 +36,33 @@ public class Scripty implements IContext {
                 .addFormatter(new AlignmentFormatter("%"));
     }
 
-    private final EnableOut log = new EnableOut(configuredOut().addFormatter(new PrependFormatter("[DEBUG]: ")), DEBUG);
-    private final IOutput out = configuredOut();
-    private final IOutput err = configuredOut().addFormatter(new PrependFormatter("[ERROR]: "));
+    private static EnableOut createLog(){
+        return new EnableOut(
+                new ConsoleOut()
+                .addFormatter(new PrependFormatter("[DEBUG]: "))
+                .addFormatter(new ReplaceArgsFormatter("{}"))
+                .addFormatter(new RichFormatter("$"))
+                .addFormatter(new AlignmentFormatter("%")), DEBUG);
+    }
+
+    private static IOutput createOut(){
+        return new ConsoleOut()
+                .addFormatter(new ReplaceArgsFormatter("{}"))
+                .addFormatter(new RichFormatter("$"))
+                .addFormatter(new AlignmentFormatter("%"));
+    }
+
+    private static IOutput createErr(){
+        return new ConsoleOut()
+                .addFormatter(new PrependFormatter("${red}([ERROR]): "))
+                .addFormatter(new ReplaceArgsFormatter("{}"))
+                .addFormatter(new RichFormatter("$"))
+                .addFormatter(new AlignmentFormatter("%"));
+    }
+
+    private final EnableOut log = createLog();
+    private final IOutput out = createOut();
+    private final IOutput err = createErr();
     private final IInput in = new ScannerIn(System.in);
 
     private final SyWorkspace workspace;

@@ -20,7 +20,6 @@ public class HelloWorldService {
     @PostSetup
     public void init(){
         ctx.log().println("Post Setup");
-        ctx.run("hello-world bla");
     }
 
 }
