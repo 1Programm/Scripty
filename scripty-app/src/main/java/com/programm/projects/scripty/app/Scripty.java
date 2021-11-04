@@ -94,6 +94,10 @@ public class Scripty implements IContext {
 
     @Override
     public void run(String input){
+        if(input.equals("")){
+            return;
+        }
+
         int nextSpace = input.indexOf(' ');
         String name, rest;
 
