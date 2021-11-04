@@ -24,4 +24,8 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <outputDirectory>${project.basedir}/module</outputDirectory>
+    </build>
+
 </project>

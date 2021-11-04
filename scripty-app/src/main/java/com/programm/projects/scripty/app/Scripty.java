@@ -6,7 +6,6 @@ import com.programm.projects.ioutils.log.api.out.IOutput;
 import com.programm.projects.ioutils.log.console.in.ScannerIn;
 import com.programm.projects.ioutils.log.console.out.*;
 import com.programm.projects.scripty.app.files.SyWorkspace;
-import com.programm.projects.scripty.app.modules.ModulesHandler;
 import com.programm.projects.scripty.module.api.IContext;
 import com.programm.projects.scripty.module.api.IWorkspace;
 
@@ -30,7 +29,6 @@ public class Scripty implements IContext {
     private final IInput in = new ScannerIn(System.in);
 
     private final SyWorkspace workspace;
-    private final ModulesHandler handler = new ModulesHandler();
 
     public Scripty(String workspacePath){
         this.workspace = new SyWorkspace(workspacePath);

@@ -9,9 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Command {
 
-    String CMD_CLASS_NAME = "CMD_NAME";
-
     //name
-    String value() default CMD_CLASS_NAME;
+    String value() default "";
 
 }

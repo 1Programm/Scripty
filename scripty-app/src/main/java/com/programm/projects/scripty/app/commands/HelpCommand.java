@@ -1,17 +1,12 @@
 package com.programm.projects.scripty.app.commands;
 
-import com.programm.projects.scripty.module.api.IContext;
-import com.programm.projects.scripty.module.api.commands.ICommand;
-import com.programm.projects.scripty.module.api.events.Get;
+import com.programm.projects.scripty.module.api.Command;
 
-public class HelpCommand implements ICommand {
+@Command
+public class HelpCommand {
 
-    @Get
-    private CommandManager manager;
-
-    @Override
-    public void run(IContext ctx, String... args) {
-        manager.runCommandAs(this, SayHiCommand.class);
+    @Command
+    public void run(String... args) {
     }
 
 }

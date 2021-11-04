@@ -1,18 +1,14 @@
 package com.programm.projects.scripty.app.commands;
 
+import com.programm.projects.scripty.module.api.Command;
 import com.programm.projects.scripty.module.api.IContext;
-import com.programm.projects.scripty.module.api.commands.CmdUse;
-import com.programm.projects.scripty.module.api.commands.ICommand;
+import com.programm.projects.scripty.module.api.events.Get;
 
-public class SayHiCommand implements ICommand {
+@Command
+public class SayHiCommand {
 
-    @Override
-    public void run(IContext ctx, String... args) {
+    @Command
+    public void run(@Get IContext ctx, String... args) {
 
-    }
-
-    @CmdUse(HelpCommand.class)
-    public String help(String... args){
-        return "A simple command to say 'hi'.";
     }
 }

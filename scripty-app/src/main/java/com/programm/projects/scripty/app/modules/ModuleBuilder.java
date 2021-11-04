@@ -3,12 +3,9 @@ package com.programm.projects.scripty.app.modules;
 import com.programm.projects.scripty.app.Scripty;
 import com.programm.projects.scripty.app.files.ConfigFileLoader;
 import com.programm.projects.scripty.app.files.ModuleConfigFile;
-import com.programm.projects.scripty.app.utils.ClassHelper;
-import com.programm.projects.scripty.module.api.IContext;
 import com.programm.projects.scripty.module.api.events.Get;
 import com.programm.projects.scripty.module.api.events.PostSetup;
 import com.programm.projects.scripty.module.api.events.PreSetup;
-import com.sun.security.auth.login.ConfigFile;
 import lombok.RequiredArgsConstructor;
 
 import java.io.File;
@@ -38,7 +35,7 @@ public class ModuleBuilder {
         }
 
 
-
+        return null;
     }
 
     public static ExecutableModule buildModule(Class<?> cls, Function<Class<?>, Object> getMap) throws SyModuleBuildException {
@@ -70,7 +67,6 @@ public class ModuleBuilder {
 
         List<MethodRunner> preSetupMethods = new ArrayList<>();
         List<MethodRunner> postSetupMethods = new ArrayList<>();
-        List<MethodRunner> onMessageMethods = new ArrayList<>();
 
         for(Method method : cls.getDeclaredMethods()){
             if(method.isAnnotationPresent(PreSetup.class)){
@@ -81,7 +77,7 @@ public class ModuleBuilder {
             }
         }
 
-        return new ExecutableModule((IModule) instance, preSetupMethods, postSetupMethods, onMessageMethods);
+        return new ExecutableModule(instance, preSetupMethods, postSetupMethods);
     }
 
     private static MethodRunner buildMethodRunner(Class<?> cls, Method method, Object instance, Function<Class<?>, Object> getMap) throws SyModuleBuildException{

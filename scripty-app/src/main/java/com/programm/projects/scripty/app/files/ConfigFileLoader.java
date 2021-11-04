@@ -1,7 +1,6 @@
 package com.programm.projects.scripty.app.files;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
@@ -35,10 +34,10 @@ public class ConfigFileLoader {
         String version = properties.getProperty(ModuleConfigFile.KEY_VERSION);
         List<String> authors = readStringList(properties, ModuleConfigFile.KEY_AUTHORS);
         String rootFolder = properties.getProperty(ModuleConfigFile.KEY_ROOT_FOLDER);
-        String moduleEntry = properties.getProperty(ModuleConfigFile.KEY_MODULE_ENTRY);
+        String basePackage = properties.getProperty(ModuleConfigFile.KEY_BASE_PACKAGE);
         List<String> files = readStringList(properties, ModuleConfigFile.KEY_FILES);
 
-        return new ModuleConfigFile(name, version, authors, rootFolder, moduleEntry, files);
+        return new ModuleConfigFile(name, version, authors, rootFolder, basePackage, files);
     }
 
     public static ModulesConfigFile modulesConfigFileLoader(File file) throws IOException{
