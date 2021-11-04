@@ -36,7 +36,7 @@ public class Scripty implements IContext {
                 .addFormatter(new AlignmentFormatter("%"));
     }
 
-    private final EnableOut log = new EnableOut(configuredOut(), true);
+    private final EnableOut log = new EnableOut(configuredOut().addFormatter(new PrependFormatter("[DEBUG]: ")), DEBUG);
     private final IOutput out = configuredOut();
     private final IOutput err = configuredOut().addFormatter(new PrependFormatter("[ERROR]: "));
     private final IInput in = new ScannerIn(System.in);
