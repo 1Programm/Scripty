@@ -82,7 +82,13 @@ public class CommandManager {
             } catch (IllegalAccessException e) {
                 throw new IllegalStateException("INVALID STATE: Method should have already been tested if it can be accessed!");
             } catch (InvocationTargetException e) {
-                throw new CommandExecutionException("Exception while executing command - method of command: [" + name + "]!");
+                Throwable cause = e.getCause();
+                if(cause == null) {
+                    throw new CommandExecutionException("${yellow}([" + name + "]): Unspecified invocation exception!", e);
+                }
+                else {
+                    throw new CommandExecutionException("${yellow}([" + name + "]): " + cause.getMessage(), cause);
+                }
             }
         }
     }
