@@ -12,50 +12,65 @@ import java.util.Map;
 
 public class CommandManager {
 
+    private static String removeStartingWith(String s, String... beginnings){
+        for(String begin : beginnings){
+            if(s.startsWith(begin)){
+                s = s.substring(begin.length());
+                break;
+            }
+        }
+
+        return s;
+    }
+
+    private static String removeEndingWith(String s, String... endings){
+        for(String end : endings){
+            if(s.endsWith(end)){
+                s = s.substring(0, s.length() - end.length());
+                break;
+            }
+        }
+
+        return s;
+    }
+
+    private static String camelCaseToHyphenString(String s){
+        StringBuilder sb = new StringBuilder();
+        boolean hasLowerBefore = false;
+
+        for(int i=0;i<s.length();i++){
+            char c = s.charAt(i);
+
+            if(Character.isUpperCase(c)){
+                if(hasLowerBefore){
+                    sb.append("-");
+                }
+                hasLowerBefore = false;
+                sb.append(Character.toLowerCase(c));
+            }
+            else {
+                hasLowerBefore = true;
+                sb.append(c);
+            }
+        }
+
+        return sb.toString();
+    }
+
     private static String generateNameForCommand(Class<?> cls) throws CommandNamingException{
         Command cmdAnnotation = cls.getAnnotation(Command.class);
+        //Should not be null as Classes passed in here must be annotated with @Command
 
         boolean generated = false;
         String name = cmdAnnotation.value();
-        //Should not be null as Objects passed in here must be annotated with @Command
 
         if(name.equals("")){
             generated = true;
+
             name = cls.getSimpleName();
-
-            if(name.startsWith("command")){
-                name = name.substring("command".length());
-            }
-            else if(name.startsWith("Command")){
-                name = name.substring("Command".length());
-            }
-            else if(name.endsWith("command")){
-                name = name.substring(0, name.length() - "command".length());
-            }
-            else if(name.endsWith("Command")){
-                name = name.substring(0, name.length() - "Command".length());
-            }
-
-            StringBuilder sb = new StringBuilder();
-            boolean hasLowerBefore = false;
-
-            for(int i=0;i<name.length();i++){
-                char c = name.charAt(i);
-
-                if(Character.isUpperCase(c)){
-                    if(hasLowerBefore){
-                        sb.append("-");
-                    }
-                    hasLowerBefore = false;
-                    sb.append(Character.toLowerCase(c));
-                }
-                else {
-                    hasLowerBefore = true;
-                    sb.append(c);
-                }
-            }
-
-            name = sb.toString();
+            name = removeStartingWith(name, "cmd", "Cmd", "command", "Command");
+            name = removeEndingWith(name, "cmd", "Cmd", "command", "Command");
+            name = camelCaseToHyphenString(name);
         }
 
         char fc = name.charAt(0);
