@@ -7,7 +7,7 @@ import com.programm.projects.scripty.module.api.IContext;
 import java.util.List;
 
 @Command("commands-list")
-public class ListCommandsCommand {
+public class CmdCommandsList {
 
     @Get
     private IContext ctx;

@@ -3,7 +3,7 @@ package com.programm.projects.scripty.app.commands;
 import com.programm.projects.scripty.module.api.Command;
 
 @Command
-public class HelpCommand {
+public class CmdHelp {
 
     @Command
     public void run(String name, String input) {

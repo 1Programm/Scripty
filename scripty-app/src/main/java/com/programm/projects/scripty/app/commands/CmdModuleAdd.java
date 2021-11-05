@@ -7,7 +7,7 @@ import com.programm.projects.scripty.module.api.Command;
 import com.programm.projects.scripty.module.api.IContext;
 
 @Command("module-add")
-public class AddModuleCommand {
+public class CmdModuleAdd {
 
     @Get
     private IContext ctx;
