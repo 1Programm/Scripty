@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CommandManager {
@@ -125,6 +127,10 @@ public class CommandManager {
         }
 
         commandInstances.put(name, new CommandWrapper(command, commandMethod));
+    }
+
+    public List<String> getCommandNames(){
+        return new ArrayList<>(commandInstances.keySet());
     }
 
 }

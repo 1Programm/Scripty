@@ -76,6 +76,8 @@ public class Scripty implements IContext {
 
         this.env.addSearchAnnotation(Command.class);
         this.env.registerInstance(IContext.class, this);
+        this.env.registerInstance(SyWorkspace.class, workspace);
+        this.env.registerInstance(CommandManager.class, commandManager);
 
         if(DEBUG) Plugz.setLogger(new ConsoleOut());
     }
