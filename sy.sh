@@ -130,6 +130,7 @@ runCommands(){
     then
       echo "Forcing version update."
     elif [ "$_CUR_VERSION" = "$_SY_LATEST" ]
+    then
       echo "Scripty already up to date!"
       exit
     fi
