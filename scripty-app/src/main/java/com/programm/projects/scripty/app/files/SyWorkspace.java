@@ -1,5 +1,6 @@
 package com.programm.projects.scripty.app.files;
 
+import com.programm.projects.scripty.app.io.SameLineWriter;
 import com.programm.projects.scripty.module.api.IContext;
 import com.programm.projects.scripty.module.api.IWorkspace;
 
@@ -282,28 +283,27 @@ public class SyWorkspace implements IWorkspace {
     }
 
     public void downloadAndAddModule(IContext ctx, String moduleUrl) throws WorkspaceException {
-        ctx.out().print("[#-------]: Reading Config File...");
+        SameLineWriter slw = new SameLineWriter(ctx.out());
+
+        slw.print("[#-------]: Reading Config File...");
 
         String moduleFileUrl = urlConcat(moduleUrl, "sy.module");
         Properties properties = readPropertiesFileFromURL(moduleFileUrl);
         ModuleConfigFile moduleConfigFile = ConfigFileLoader.moduleConfigFileLoader(properties);
 
-        ctx.out().print("${back}[##------]: Reading properties of module [{}]...", moduleConfigFile.getName());
-
+        slw.print("[##------]: Reading properties of module [" + moduleConfigFile.getName() + "]...");
         try { Thread.sleep(1000); } catch (InterruptedException ignore) {}
 
-        ctx.out().print("${back}[###-----]: Setting up folders in scripty home...");
-
+        slw.print("[###-----]: Setting up folders in scripty home...");
         String modulePath = createModuleFolders(ctx, moduleConfigFile);
-
         try { Thread.sleep(1000); } catch (InterruptedException ignore) {}
 
 
-        ctx.out().print("${back}[####----]: Downloading module files...");
+        slw.print("[####----]: Downloading module files...");
         copyModule(ctx, moduleUrl, moduleConfigFile);
 
 
-        ctx.out().print("${back}[#######-]: Saving module name in sy.modules...");
+        slw.print("[#######-]: Saving module name in sy.modules...");
         Map<String, String> modulesMap = new HashMap<>(modulesConfigFile.getModuleNameToUrlMap());
         modulesMap.put(moduleConfigFile.getName(), modulePath);
 
@@ -314,7 +314,7 @@ public class SyWorkspace implements IWorkspace {
             throw new WorkspaceException("Could not save modules config file for module: [" + moduleConfigFile.getName() + "]!", e);
         }
 
-        ctx.out().println("${back}[########]: Successfully downloaded ${yellow}([{}])", moduleConfigFile.getName());
+        slw.print("${back}[########]: Successfully downloaded ${yellow}([" + moduleConfigFile.getName() + "])\n");
     }
 
     private String createModuleFolders(IContext ctx, ModuleConfigFile config) throws WorkspaceException{
