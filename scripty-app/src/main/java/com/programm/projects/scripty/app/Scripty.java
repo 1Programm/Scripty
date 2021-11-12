@@ -29,13 +29,6 @@ public class Scripty implements IContext {
 
     private static final boolean DEBUG = false;
 
-    private static IFormattedOutput configuredOut(){
-        return new ConsoleOut()
-                .addFormatter(new ReplaceArgsFormatter("{}"))
-                .addFormatter(new RichFormatter("$"))
-                .addFormatter(new AlignmentFormatter("%"));
-    }
-
     private static EnableOut createLog(){
         return new EnableOut(
                 new ConsoleOut()
