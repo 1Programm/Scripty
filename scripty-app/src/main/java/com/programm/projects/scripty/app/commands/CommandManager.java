@@ -1,6 +1,8 @@
 package com.programm.projects.scripty.app.commands;
 
+import com.programm.projects.plugz.magic.MagicEnvironment;
 import com.programm.projects.scripty.module.api.Command;
+import com.programm.projects.scripty.module.api.Help;
 import lombok.RequiredArgsConstructor;
 
 import java.lang.reflect.InvocationTargetException;
@@ -90,6 +92,7 @@ public class CommandManager {
     private static class CommandWrapper {
         private final Object commandInstance;
         private final Method commandMethod;
+        private final Method helpMethod;
 
         public void run(String name, String input) throws CommandExecutionException {
             try {
@@ -106,10 +109,27 @@ public class CommandManager {
                 }
             }
         }
+
+        public void runHelp(String name) throws CommandExecutionException{
+            if(helpMethod == null) throw new NullPointerException("No help for command [" + name + "] defined!");
+
+            try {
+                helpMethod.invoke(commandInstance, name);
+            } catch (IllegalAccessException e) {
+                throw new IllegalStateException("INVALID STATE: Method should have already been tested if it can be accessed!");
+            } catch (InvocationTargetException e) {
+                Throwable cause = e.getCause();
+                if(cause == null) {
+                    throw new CommandExecutionException("${yellow}([" + name + "]): Unspecified invocation exception!", e);
+                }
+                else {
+                    throw new CommandExecutionException("${yellow}([" + name + "]): " + cause.getMessage(), cause);
+                }
+            }
+        }
     }
 
     private final Map<String, CommandWrapper> commandInstances = new HashMap<>();
-
 
     public void run(String name, String input) throws CommandExecutionException {
         CommandWrapper cmd = commandInstances.get(name);
@@ -121,6 +141,16 @@ public class CommandManager {
         cmd.run(name, input);
     }
 
+    public void runHelp(String name) throws CommandExecutionException {
+        CommandWrapper cmd = commandInstances.get(name);
+
+        if(cmd == null){
+            throw new NullPointerException("No such command: [" + name + "]!");
+        }
+
+        cmd.runHelp(name);
+    }
+
     public void registerCommand(Object command) throws CommandNamingException, CommandSetupException {
         String name = generateNameForCommand(command.getClass());
 
@@ -130,11 +160,14 @@ public class CommandManager {
 
         Class<?> cmdClass = command.getClass();
         Method commandMethod = null;
+        Method helpMethod = null;
 
         for(Method method : cmdClass.getDeclaredMethods()){
             if(method.isAnnotationPresent(Command.class)){
                 commandMethod = method;
-                break;
+            }
+            else if(method.isAnnotationPresent(Help.class)){
+                helpMethod = method;
             }
         }
 
@@ -147,7 +180,14 @@ public class CommandManager {
             throw new CommandSetupException("Command method in class [" + cmdClass.getName() + "] must have exactly 2 Strings as parameters!");
         }
 
-        commandInstances.put(name, new CommandWrapper(command, commandMethod));
+        if(helpMethod != null){
+            Class<?>[] helpTypes = helpMethod.getParameterTypes();
+            if(helpMethod.getParameterCount() != 1 || helpTypes[0] != String.class){
+                throw new CommandSetupException("Help method in class [" + cmdClass.getName() + "] must have exactly 1 String as a parameter!");
+            }
+        }
+
+        commandInstances.put(name, new CommandWrapper(command, commandMethod, helpMethod));
     }
 
     public List<String> getCommandNames(){
