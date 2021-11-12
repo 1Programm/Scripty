@@ -125,28 +125,32 @@ runCommands(){
     _SY_LATEST="${_SY_VERSIONS[0]}"
     info "Testing current version against latest [$_CUR_VERSION == $_SY_LATEST]"
 
-    if [ "$_CUR_VERSION" = "$_SY_LATEST" ]
+    argsContains "-f" "--force"
+    if [ "$_argsContains" = "true" ]
     then
+      echo "Forcing version update."
+    elif [ "$_CUR_VERSION" = "$_SY_LATEST" ]
       echo "Scripty already up to date!"
-    else
-      echo "Updating Scripty [$_CUR_VERSION > $_SY_LATEST] ..."
-
-      info ""
-      info "Updating version file at [/usr/local/bin/sy.d/version]"
-      sudo rm /usr/local/bin/sy.d/version
-      sudo bash -c "echo $_SY_LATEST > /usr/local/bin/sy.d/version"
-
-
-      info ""
-      info "Updating Scripty-Engine at [/usr/local/bin/sy.d/scripty.jar]"
-      sudo rm /usr/local/bin/sy.d/scripty.jar
-      _TMP_PATH="https://raw.githubusercontent.com/1Programm/Scripty/master/releases/scripty-$_SY_LATEST.jar"
-      info "Downloading Scripty-Engine from [$_TMP_PATH] ..."
-      sudo curl -sS -o /usr/local/bin/sy.d/scripty.jar "$_TMP_PATH"
-
-      info ""
-      echo "Scripty successfully updated to version [$_SY_LATEST]!"
+      exit
     fi
+
+    echo "Updating Scripty [$_CUR_VERSION > $_SY_LATEST] ..."
+
+    info ""
+    info "Updating version file at [/usr/local/bin/sy.d/version]"
+    sudo rm /usr/local/bin/sy.d/version
+    sudo bash -c "echo $_SY_LATEST > /usr/local/bin/sy.d/version"
+
+
+    info ""
+    info "Updating Scripty-Engine at [/usr/local/bin/sy.d/scripty.jar]"
+    sudo rm /usr/local/bin/sy.d/scripty.jar
+    _TMP_PATH="https://raw.githubusercontent.com/1Programm/Scripty/master/releases/scripty-$_SY_LATEST.jar"
+    info "Downloading Scripty-Engine from [$_TMP_PATH] ..."
+    sudo curl -sS -o /usr/local/bin/sy.d/scripty.jar "$_TMP_PATH"
+
+    info ""
+    echo "Scripty successfully updated to version [$_SY_LATEST]!"
 
     exit
   fi
