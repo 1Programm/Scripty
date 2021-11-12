@@ -245,6 +245,7 @@ public class SyWorkspace implements IWorkspace {
     //COMMAND USE
 
 
+    // -------
     public String findModuleUrl(IContext ctx, String name){
         List<String> repoUrls = reposConfigFile.getRepoUrls();
 
@@ -255,6 +256,7 @@ public class SyWorkspace implements IWorkspace {
                 String mappedUrl = findModuleUrl(ctx, name, repoUrl);
 
                 if (mappedUrl != null) {
+                    ctx.log().println("Found module [{}] in repo [{}].", name, repoUrl);
                     return mappedUrl;
                 }
             }
@@ -280,13 +282,28 @@ public class SyWorkspace implements IWorkspace {
     }
 
     public void downloadAndAddModule(IContext ctx, String moduleUrl) throws WorkspaceException {
+        ctx.out().print("[#-------]: Reading Config File...");
+
         String moduleFileUrl = urlConcat(moduleUrl, "sy.module");
         Properties properties = readPropertiesFileFromURL(moduleFileUrl);
         ModuleConfigFile moduleConfigFile = ConfigFileLoader.moduleConfigFileLoader(properties);
 
+        ctx.out().print("${back}[##------]: Reading properties of module [{}]...", moduleConfigFile.getName());
+
+        try { Thread.sleep(1000); } catch (InterruptedException ignore) {}
+
+        ctx.out().print("${back}[###-----]: Setting up folders in scripty home...");
+
         String modulePath = createModuleFolders(ctx, moduleConfigFile);
+
+        try { Thread.sleep(1000); } catch (InterruptedException ignore) {}
+
+
+        ctx.out().print("${back}[####----]: Downloading module files...");
         copyModule(ctx, moduleUrl, moduleConfigFile);
 
+
+        ctx.out().print("${back}[#######-]: Saving module name in sy.modules...");
         Map<String, String> modulesMap = new HashMap<>(modulesConfigFile.getModuleNameToUrlMap());
         modulesMap.put(moduleConfigFile.getName(), modulePath);
 
@@ -296,6 +313,8 @@ public class SyWorkspace implements IWorkspace {
         catch (IOException e){
             throw new WorkspaceException("Could not save modules config file for module: [" + moduleConfigFile.getName() + "]!", e);
         }
+
+        ctx.out().println("${back}[########]: Successfully downloaded ${yellow}([{}])", moduleConfigFile.getName());
     }
 
     private String createModuleFolders(IContext ctx, ModuleConfigFile config) throws WorkspaceException{
@@ -372,6 +391,58 @@ public class SyWorkspace implements IWorkspace {
             }
         }
     }
+    // -------
+
+
+    // -------
+    public void removeModule(IContext ctx, String name) throws WorkspaceException {
+        String filePath = modulesConfigFile.getModuleNameToUrlMap().get(name);
+
+        if(filePath == null){
+            throw new WorkspaceException("No such module installed: [" + name + "]!");
+        }
+
+        File file = new File(filePath);
+        if(file.exists()){
+            if(!recRemove(file)){
+                throw new WorkspaceException("File path at [" + filePath + "] could not be fully removed!");
+            }
+        }
+
+        Map<String, String> modulesMap = new HashMap<>(modulesConfigFile.getModuleNameToUrlMap());
+        modulesMap.remove(name);
+
+        try {
+            saveModulesConfig(new ModulesConfigFile(modulesMap));
+        }
+        catch (IOException e){
+            throw new WorkspaceException("Could not save modules config file!", e);
+        }
+    }
+
+    private boolean recRemove(File f){
+        boolean result = true;
+
+        if(f.isDirectory()){
+            File[] children = f.listFiles();
+            if(children != null){
+                for(File child : children){
+                    if(!recRemove(child)){
+                        result = false;
+                    }
+                }
+            }
+
+            if(!f.delete()) return false;
+            return result;
+        }
+        else {
+            return f.delete();
+        }
+    }
+    // -------
+
+
 
     public List<String> listModules(){
         return new ArrayList<>(modulesConfigFile.getModuleNameToUrlMap().keySet());
