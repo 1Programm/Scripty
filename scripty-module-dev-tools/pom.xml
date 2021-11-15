@@ -2,19 +2,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>scripty-parent</artifactId>
+        <groupId>com.programm.projects</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.programm.projects</groupId>
-    <artifactId>scripty-parent</artifactId>
-    <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
-
-    <modules>
-        <module>scripty-app</module>
-        <module>scripty-module-api</module>
-        <module>scripty-module-helloworld</module>
-        <module>scripty-module-dev-tools</module>
-    </modules>
+    <artifactId>scripty-module-dev-tools</artifactId>
+    <version>0.1</version>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -23,11 +19,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.22</version>
-            <scope>provided</scope>
+            <groupId>com.programm.projects</groupId>
+            <artifactId>scripty-module-api</artifactId>
+            <version>0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <outputDirectory>${project.basedir}/module</outputDirectory>
+    </build>
 
 </project>
