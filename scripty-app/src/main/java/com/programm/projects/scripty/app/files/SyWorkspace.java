@@ -2,6 +2,7 @@ package com.programm.projects.scripty.app.files;
 
 import com.programm.projects.scripty.app.io.SameLineWriter;
 import com.programm.projects.scripty.module.api.IContext;
+import com.programm.projects.scripty.module.api.IStore;
 import com.programm.projects.scripty.module.api.IWorkspace;
 
 import java.io.*;
@@ -12,15 +13,28 @@ import java.util.*;
 
 public class SyWorkspace implements IWorkspace {
 
+    static void ensureFolders(String path) throws IOException{
+        File f = new File(path);
+
+        if(!f.exists() && !f.mkdirs()){
+            throw new IOException("Could not create directories for path: [" + path + "]!");
+        }
+    }
+
+
     private final String workspacePath;
+    private final BasicStore globalStore;
+
     private File reposFile;
     private File modulesFile;
 
     private ReposConfigFile reposConfigFile;
     private ModulesConfigFile modulesConfigFile;
 
+
     public SyWorkspace(String workspacePath) {
         this.workspacePath = workspacePath;
+        this.globalStore = new BasicStore(new File(workspacePath, "data/global.store"));
     }
 
     public boolean loadWorkspace(IContext ctx){
@@ -108,6 +122,14 @@ public class SyWorkspace implements IWorkspace {
             ctx.err().println("Could not read [sy.modules] - file at: [{}].", modulesFile.getAbsolutePath());
             ctx.err().println(e.getMessage());
             ctx.log().println("Cancelling workspace setup.");
+            return false;
+        }
+
+        try {
+            globalStore.initialLoad();
+        }
+        catch (WorkspaceException e){
+            ctx.err().println("Could not setup global store: [{}].", e.getMessage());
             return false;
         }
 
@@ -232,14 +254,6 @@ public class SyWorkspace implements IWorkspace {
             else {
                 return root + "/" + add;
             }
-        }
-    }
-
-    private void ensureFolders(String path) throws IOException{
-        File f = new File(path);
-
-        if(!f.exists() && !f.mkdirs()){
-            throw new IOException("Could not create directories for path: [" + path + "]!");
         }
     }
 
@@ -446,5 +460,15 @@ public class SyWorkspace implements IWorkspace {
 
     public List<String> listModules(){
         return new ArrayList<>(modulesConfigFile.getModuleNameToUrlMap().keySet());
+    }
+
+    @Override
+    public IStore globalStore() {
+        return globalStore;
+    }
+
+    @Override
+    public IStore privateStore() {
+        return null;
     }
 }
