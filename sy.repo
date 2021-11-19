@@ -4,3 +4,4 @@ module.name0=hello-world
 module.url0=https://raw.githubusercontent.com/1Programm/Scripty/master/scripty-module-helloworld
 module.name1=dev-tools
 module.url1=https://raw.githubusercontent.com/1Programm/Scripty/master/scripty-module-dev-tools
+#module.url1=file\:///Users/julian/Desktop/Programming/Java/projects/scripty/scripty-module-dev-tools

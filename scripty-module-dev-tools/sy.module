@@ -4,3 +4,4 @@ authors.author0=Programm
 root-folder=module
 base-package=com.programm.projects.scripty.module.dev.tools
 files.file0=LocalUpdateCommand.class
+files.file1=DevtoolsConfig.class

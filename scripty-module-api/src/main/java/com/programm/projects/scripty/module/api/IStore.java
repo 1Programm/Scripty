@@ -8,6 +8,7 @@ public interface IStore {
 
     default String load(String key){
         Object obj = load(key, Object.class);
+        if(obj == null) return null;
         return obj.toString();
     }
 }

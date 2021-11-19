@@ -21,7 +21,7 @@ public class BasicStore implements IStore {
     public void initialLoad() throws WorkspaceException{
         if(!storeFile.exists() || !storeFile.isFile()){
             try {
-                SyWorkspace.ensureFolders(storeFile.getAbsolutePath());
+                SyWorkspace.ensureFolders(storeFile.getParentFile().getAbsolutePath());
             }
             catch (IOException e){
                 throw new WorkspaceException("Could not create directories for store file at: [" + storeFile.getAbsolutePath() + "].", e);
@@ -35,50 +35,45 @@ public class BasicStore implements IStore {
                 throw new WorkspaceException("Could not create new Store file at: [" + storeFile.getAbsolutePath() + "].");
             }
         }
+        else {
+            try (BufferedReader br = new BufferedReader(new FileReader(storeFile))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    StoreEntry entry = new StoreEntry();
+                    List<String> list = retrieveSplitDoubleColons(line);
 
-        try(BufferedReader br = new BufferedReader(new FileReader(storeFile))){
-            String line;
-            while((line = br.readLine()) != null){
-                StoreEntry entry = new StoreEntry();
-                List<String> list = retrieveSplitDoubleColons(line);
+                    if (list.size() != 3) {
+                        throw new WorkspaceException("Invalid entry: [" + line + "] in store: [" + storeFile.getAbsolutePath() + "].");
+                    }
 
-                if(list.size() != 3){
-                    throw new WorkspaceException("Invalid entry: [" + line + "] in store: [" + storeFile.getAbsolutePath() + "].");
-                }
+                    String _key = list.get(0);
+                    String _value = list.get(1);
+                    String _type = list.get(2);
 
-                String _key = list.get(0);
-                String _value = list.get(1);
-                String _type = list.get(2);
+                    if (_type.equals("String")) {
+                        entry.value = _value;
+                        entry.type = String.class;
+                    } else if (_type.equals("Integer")) {
+                        entry.value = Integer.parseInt(_value);
+                        entry.type = Integer.class;
+                    } else if (_type.equals("Float")) {
+                        entry.value = Float.parseFloat(_value);
+                        entry.type = Float.class;
+                    } else if (_type.equals("Double")) {
+                        entry.value = Double.parseDouble(_value);
+                        entry.type = Double.class;
+                    } else if (_type.equals("Boolean")) {
+                        entry.value = Boolean.parseBoolean(_value);
+                        entry.type = Boolean.class;
+                    } else {
+                        throw new WorkspaceException("Unsupported type [" + _type + "] defined in Store file: [" + storeFile.getAbsolutePath() + "].");
+                    }
 
-                if(_type.equals("String")){
-                    entry.value = _value;
-                    entry.type = String.class;
+                    entries.put(_key, entry);
                 }
-                else if(_type.equals("Integer")){
-                    entry.value = Integer.parseInt(_value);
-                    entry.type = Integer.class;
-                }
-                else if(_type.equals("Float")){
-                    entry.value = Float.parseFloat(_value);
-                    entry.type = Float.class;
-                }
-                else if(_type.equals("Double")){
-                    entry.value = Double.parseDouble(_value);
-                    entry.type = Double.class;
-                }
-                else if(_type.equals("Boolean")){
-                    entry.value = Boolean.parseBoolean(_value);
-                    entry.type = Boolean.class;
-                }
-                else {
-                    throw new WorkspaceException("Unsupported type [" + _type + "] defined in Store file: [" + storeFile.getAbsolutePath() + "].");
-                }
-
-                entries.put(_key, entry);
+            } catch (IOException e) {
+                throw new WorkspaceException("Could not read store file: [" + storeFile.getAbsolutePath() + "].", e);
             }
-        }
-        catch (IOException e){
-            throw new WorkspaceException("Could not read store file: [" + storeFile.getAbsolutePath() + "].", e);
         }
     }
 

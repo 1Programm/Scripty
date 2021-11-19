@@ -4,6 +4,7 @@ import com.programm.projects.scripty.app.io.SameLineWriter;
 import com.programm.projects.scripty.module.api.IContext;
 import com.programm.projects.scripty.module.api.IStore;
 import com.programm.projects.scripty.module.api.IWorkspace;
+import com.programm.projects.scripty.module.api.StoreException;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -24,6 +25,7 @@ public class SyWorkspace implements IWorkspace {
 
     private final String workspacePath;
     private final BasicStore globalStore;
+    private final Map<String, IStore> stores = new HashMap<>();
 
     private File reposFile;
     private File modulesFile;
@@ -468,7 +470,27 @@ public class SyWorkspace implements IWorkspace {
     }
 
     @Override
-    public IStore privateStore() {
-        return null;
+    public boolean exists(String name) {
+        return stores.containsKey(name);
+    }
+
+    @Override
+    public IStore store(String name) throws StoreException {
+        IStore store = stores.get(name);
+
+        if(store == null){
+            File file = new File(workspacePath, "data/stores/" + name + ".store");
+            BasicStore nStore = new BasicStore(file);
+            try {
+                nStore.initialLoad();
+            }
+            catch (WorkspaceException e){
+                throw new StoreException("Could not finish initial load for store at: [" + file.getAbsolutePath() + "].", e);
+            }
+
+            store = nStore;
+        }
+
+        return store;
     }
 }
